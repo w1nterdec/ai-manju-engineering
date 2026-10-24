@@ -1,0 +1,43 @@
+{
+  "canon_version": "0.1",
+  "project": {
+    "language": "zh-CN",
+    "aspect_ratio": "9:16",
+    "visual_style": "原创中文悬疑漫画，清晰线稿，低饱和蓝灰色，暖色桌灯，克制表演",
+    "canon_facts": [
+      "单行舟与乐知遥是同事，均为成年人。",
+      "单行舟的单按姓氏读 shan4，行舟读 xing2 zhou1；乐知遥的乐按本角色设定读 yue4。",
+      "二人此前听到门外有人叫单行舟的名字，但尚未看见那个人。",
+      "信封保持封口，任何镜头都不能提前展示信的正文。"
+    ],
+    "negative_prompt": "检查多余手指、手部融合、人物换脸、衣着变化、信封数量变化、镜像道具、文字乱码；禁止未经剧本允许增加角色。"
+  },
+  "characters": [
+    {
+      "id": "C001",
+      "name": "单行舟",
+      "appearance": "成年男性，短黑发，深灰夹克，白色内衬，左眉有一处浅疤；本集服装固定。",
+      "voice_direction": "成年男性中低音，普通话，克制疑惑；整集固定同一授权音色。",
+      "reference_image": ""
+    },
+    {
+      "id": "C002",
+      "name": "乐知遥",
+      "appearance": "成年女性，齐肩直发，深蓝外套，银色圆形耳钉；本集服装固定。",
+      "voice_direction": "成年女性中音，普通话，警觉而清晰；整集固定同一授权音色。",
+      "reference_image": ""
+    }
+  ],
+  "pronunciation_lexicon": [
+    {
+      "term": "单行舟",
+      "pinyin": "shan4 xing2 zhou1",
+      "note": "本角色完整姓名。单为多音姓氏；须用选定音色逐句试听。"
+    },
+    {
+      "term": "乐知遥",
+      "pinyin": "yue4 zhi1 yao2",
+      "note": "本角色作者指定读音；乐不读 le4。"
+    }
+  ]
+}

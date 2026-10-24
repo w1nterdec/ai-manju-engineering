@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.1",
+  "project": {
+    "id": "EP002",
+    "title": "午夜来信：门后的脚步"
+  },
+  "beats": [
+    {
+      "id": "B101",
+      "summary": "两人等待门外回应。",
+      "required_facts": [
+        "信封仍在单行舟右手，保持封口。",
+        "门保持关闭。"
+      ],
+      "lines": [
+        {
+          "id": "L101",
+          "speaker_id": "C001",
+          "text": "乐知遥，先别开门。"
+        }
+      ]
+    }
+  ],
+  "initial_state": {
+    "letter.location": "C001.right_hand",
+    "letter.seal": "closed",
+    "clock.state": "stopped_2359",
+    "door.state": "closed"
+  },
+  "shots": [
+    {
+      "id": "S101",
+      "beat_ids": [
+        "B101"
+      ],
+      "duration_ms": 8000,
+      "location": "档案室，木桌与关闭的门",
+      "time": "深夜",
+      "character_ids": [
+        "C001",
+        "C002"
+      ],
+      "framing": "双人中景，保留画左单行舟、画右乐知遥的空间关系，关闭的门位于背景",
+      "action": "两人注视关闭的门，保持原有站位。",
+      "emotion": "乐知遥压低声音；单行舟握住信封，保持克制紧张。",
+      "state_before": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "state_after": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "lines": [
+        {
+          "line_id": "L101",
+          "delivery": "on_screen",
+          "start_ms": 1000,
+          "end_ms": 5000
+        }
+      ]
+    }
+  ],
+  "canon_ref": "canon.json"
+}

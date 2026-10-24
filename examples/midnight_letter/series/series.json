@@ -1,0 +1,9 @@
+{
+  "series_version": "0.1",
+  "id": "MIDNIGHT_LETTER",
+  "continuous": true,
+  "episodes": [
+    "ep001.json",
+    "ep002.json"
+  ]
+}

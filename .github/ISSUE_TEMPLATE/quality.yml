@@ -1,0 +1,35 @@
+name: 制作质量或工具缺陷
+description: 提供可定位的输入、实际结果与期望行为
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: 问题类型
+      options:
+        - 姓名或术语读音
+        - 人物或画面连续性
+        - 剧情与台词匹配
+        - 数据校验或编译
+        - 复核记录与文件版本
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 最小复现
+      description: 命令、契约版本、最小输入，以及可分享的实际输出或文件摘要
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望与实际结果
+      description: 媒体问题请注明镜头/台词 ID 和时间点；不要只写效果不好
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境与供应商版本
+      description: 操作系统、Python 版本、工具版本；如适用，附实际模型与音色 ID

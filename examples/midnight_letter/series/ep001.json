@@ -1,0 +1,219 @@
+{
+  "schema_version": "0.1",
+  "project": {
+    "id": "EP001",
+    "title": "午夜来信：明天的日期"
+  },
+  "beats": [
+    {
+      "id": "B001",
+      "summary": "单行舟拿起桌上的密封信封，询问来源。",
+      "required_facts": [
+        "桌上只有一个密封信封。",
+        "信封由桌面移动到单行舟右手。"
+      ],
+      "lines": [
+        {
+          "id": "L001",
+          "speaker_id": "C001",
+          "text": "乐知遥，这封信是你放的？"
+        }
+      ]
+    },
+    {
+      "id": "B002",
+      "summary": "乐知遥阻止拆信，指出信封的日期。",
+      "required_facts": [
+        "乐知遥要求保持封口。",
+        "信封署期为明天；日期文字由后期叠加。"
+      ],
+      "lines": [
+        {
+          "id": "L002",
+          "speaker_id": "C002",
+          "text": "单行舟，别拆。上面是明天的日期。"
+        }
+      ]
+    },
+    {
+      "id": "B003",
+      "summary": "静止的挂钟成为第二个异常线索。",
+      "required_facts": [
+        "挂钟停在二十三点五十九分。",
+        "信封仍然没有被拆开。"
+      ],
+      "lines": [
+        {
+          "id": "L003",
+          "speaker_id": "C001",
+          "text": "钟停在十一点五十九分。"
+        }
+      ]
+    },
+    {
+      "id": "B004",
+      "summary": "乐知遥提及门外的人，两人看向关闭的门。",
+      "required_facts": [
+        "两人看向同一扇关闭的门。",
+        "门外的人尚未露面，不能新增可见人物。"
+      ],
+      "lines": [
+        {
+          "id": "L004",
+          "speaker_id": "C002",
+          "text": "门外那个人，刚才也叫了你的名字。"
+        }
+      ]
+    }
+  ],
+  "initial_state": {
+    "letter.location": "table",
+    "letter.seal": "closed",
+    "clock.state": "stopped_2359",
+    "door.state": "closed"
+  },
+  "shots": [
+    {
+      "id": "S001",
+      "beat_ids": [
+        "B001"
+      ],
+      "duration_ms": 8000,
+      "location": "档案室，木桌旁",
+      "time": "深夜",
+      "character_ids": [
+        "C001",
+        "C002"
+      ],
+      "framing": "双人中景，固定机位，单行舟画左、乐知遥画右，桌面可见",
+      "action": "单行舟用右手拿起桌上唯一的密封信封。",
+      "emotion": "单行舟疑惑地看向乐知遥；乐知遥紧张注视信封。",
+      "state_before": {
+        "letter.location": "table",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "state_after": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "lines": [
+        {
+          "line_id": "L001",
+          "delivery": "on_screen",
+          "start_ms": 2000,
+          "end_ms": 6000
+        }
+      ]
+    },
+    {
+      "id": "S002",
+      "beat_ids": [
+        "B002"
+      ],
+      "duration_ms": 8000,
+      "location": "档案室，木桌旁",
+      "time": "深夜",
+      "character_ids": [
+        "C001",
+        "C002"
+      ],
+      "framing": "乐知遥近景，画面下方保留单行舟右手与信封，不跨轴",
+      "action": "乐知遥抬手指向信封的日期区域，不接触信封；日期由后期准确叠加。",
+      "emotion": "警觉，清晰阻止拆信。",
+      "state_before": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "state_after": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "lines": [
+        {
+          "line_id": "L002",
+          "delivery": "on_screen",
+          "start_ms": 500,
+          "end_ms": 6500
+        }
+      ]
+    },
+    {
+      "id": "S003",
+      "beat_ids": [
+        "B003"
+      ],
+      "duration_ms": 8000,
+      "location": "档案室，墙面挂钟",
+      "time": "深夜",
+      "character_ids": [],
+      "framing": "挂钟特写，固定机位，不展示人物",
+      "action": "展示停在二十三点五十九分的指针；用经审核钟面底图或后期合成保证指针正确。",
+      "emotion": "安静，压迫感增强；保留细微环境底噪。",
+      "state_before": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "state_after": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "lines": [
+        {
+          "line_id": "L003",
+          "delivery": "off_screen",
+          "start_ms": 1000,
+          "end_ms": 5000
+        }
+      ]
+    },
+    {
+      "id": "S004",
+      "beat_ids": [
+        "B004"
+      ],
+      "duration_ms": 8000,
+      "location": "档案室，木桌与关闭的门",
+      "time": "深夜",
+      "character_ids": [
+        "C001",
+        "C002"
+      ],
+      "framing": "双人中景，保留画左单行舟、画右乐知遥的空间关系，关闭的门位于背景",
+      "action": "两人缓慢把视线转向背景的门，门始终关闭，不出现门外人物。",
+      "emotion": "乐知遥压低声音；单行舟握住信封，保持克制紧张。",
+      "state_before": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "state_after": {
+        "letter.location": "C001.right_hand",
+        "letter.seal": "closed",
+        "clock.state": "stopped_2359",
+        "door.state": "closed"
+      },
+      "lines": [
+        {
+          "line_id": "L004",
+          "delivery": "on_screen",
+          "start_ms": 500,
+          "end_ms": 6500
+        }
+      ]
+    }
+  ],
+  "canon_ref": "canon.json"
+}

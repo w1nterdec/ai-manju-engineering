@@ -1,0 +1,33 @@
+name: Offline contract and pipeline checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.10', '3.12', '3.14']
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Check original episode
+        run: python -m manju check examples/midnight_letter/episode.json
+      - name: Check shared series
+        run: python -m manju check-series examples/midnight_letter/series/series.json
+      - name: Compile a planning bundle
+        run: python -m manju build examples/midnight_letter/episode.json --out build/ci
