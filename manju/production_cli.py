@@ -93,6 +93,26 @@ def add_commands(commands):
     audio_map.add_argument("directory")
     audio_map.add_argument("--out", required=True)
     audio_map.set_defaults(handler=audio_map_command)
+    handoff_parser = commands.add_parser("handoff", help="导出通用剪辑交接 CSV/JSON/SRT")
+    handoff_parser.add_argument("bundle")
+    handoff_parser.add_argument("--alignment")
+    handoff_parser.add_argument("--out", required=True)
+    handoff_parser.set_defaults(handler=handoff_command)
+    packaging = commands.add_parser("package", help="生产交付包；仅 --demo 可接受 mock")
+    packaging.add_argument("bundle")
+    packaging.add_argument("--run")
+    packaging.add_argument("--config")
+    packaging.add_argument("--review")
+    packaging.add_argument("--final")
+    packaging.add_argument("--alignment")
+    packaging.add_argument("--provenance")
+    packaging.add_argument("--demo", action="store_true")
+    packaging.add_argument("--include-costs", action="store_true")
+    packaging.add_argument("--out", required=True)
+    packaging.set_defaults(handler=package_command)
+    verification = commands.add_parser("verify-package", help="独立校验交付包文件摘要与完整性")
+    verification.add_argument("directory")
+    verification.set_defaults(handler=verify_package_command)
 
 
 def emit(value):
@@ -221,3 +241,22 @@ def audio_map_command(args):
             lines[task_id.split(":", 1)[1]] = relative
     atomic_json(destination, {"audio_map_version": "1.0", "mock": True, "lines": lines})
     return emit({"mock": True, "lines": len(lines)})
+
+
+def handoff_command(args):
+    from .delivery import handoff
+    result = handoff(args.bundle, args.out, args.alignment)
+    return emit({"timing_basis": result["timing_basis"], "out": args.out})
+
+
+def package_command(args):
+    from .delivery import package
+    result = package(args.bundle, args.out, load_config(args.config), run=args.run, demo=args.demo, review=args.review, final=args.final, alignment=args.alignment, provenance=args.provenance, include_costs=args.include_costs)
+    return emit({"mode": result["mode"], "production_ready": result["production_ready"], "out": args.out})
+
+
+def verify_package_command(args):
+    from .delivery import verify_package
+    result = verify_package(args.directory)
+    emit(result)
+    return int(not result["passed"])

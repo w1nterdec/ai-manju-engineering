@@ -4,7 +4,7 @@
 
 [GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
 
-**当前版本：0.6.0 / M5。** 本地媒体探测、实测音频字幕时间轴与自动人工分栏质量报告 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
+**当前版本：0.7.0 / M6。** 通用剪辑交接、严格生产交付门禁、演示包与独立完整性验证 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
 
 ## 从哪里开始
 
@@ -28,6 +28,9 @@ python -m manju cost-report build/run
 python -m manju demo-audio-map build/run --out build/audio-map.json
 python -m manju align build/demo-v1 build/audio-map.json --out build/aligned
 python -m manju quality-report build/demo-v1 --run build/run --out build/quality.json
+python -m manju handoff build/demo-v1 --alignment build/aligned --out build/handoff
+python -m manju package build/demo-v1 --run build/run --demo --alignment build/aligned --out build/delivery
+python -m manju verify-package build/delivery
 python -m unittest discover -s tests -v
 ```
 
