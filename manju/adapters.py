@@ -3,6 +3,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Mapping, Tuple
 import wave
+import os
+import re
+import tempfile
 
 from .io import digest, read_json
 from .safeio import atomic_json, fingerprint, redact
@@ -48,6 +51,8 @@ class MockProvider:
 
     def generate(self, request, directory):
         self.capabilities.require(request.kind, request.parameters)
+        if not re.fullmatch(r"[0-9a-f]{64}", request.idempotency_key):
+            raise ValueError("幂等键须为 SHA-256，禁止作为任意路径")
         if not request.model.startswith("mock-"):
             raise ValueError("MockProvider 只接受明确标注的 mock-* 模型")
         metadata = {
@@ -68,15 +73,24 @@ class MockProvider:
             audio = output.with_suffix(".wav")
             if not audio.exists():
                 duration_ms = request.parameters.get("duration_ms", 1000)
-                with wave.open(str(audio), "wb") as stream:
-                    stream.setnchannels(1)
-                    stream.setsampwidth(2)
-                    stream.setframerate(8000)
-                    remaining = duration_ms * 8
-                    while remaining:
-                        frames = min(remaining, 8000)
-                        stream.writeframesraw(b"\0\0" * frames)
-                        remaining -= frames
+                fd, temporary = tempfile.mkstemp(prefix=".audio-", dir=audio.parent)
+                try:
+                    with os.fdopen(fd, "wb") as target:
+                        with wave.open(target, "wb") as stream:
+                            stream.setnchannels(1)
+                            stream.setsampwidth(2)
+                            stream.setframerate(8000)
+                            remaining = duration_ms * 8
+                            while remaining:
+                                frames = min(remaining, 8000)
+                                stream.writeframesraw(b"\0\0" * frames)
+                                remaining -= frames
+                        target.flush()
+                        os.fsync(target.fileno())
+                    os.replace(temporary, audio)
+                finally:
+                    if os.path.exists(temporary):
+                        os.unlink(temporary)
             result.update(media_path=audio.name, media_sha256=digest(audio), notice="mock 静音 WAV，仅供实测时间轴测试，不是配音")
         return result
 
@@ -123,6 +137,16 @@ def load_config(path=None):
         raise ValueError("routes 须包含 defaults 与可选 shots 对象")
     for kind in LAYERS:
         route_for(data, kind)
+    for shot_id, overrides in routes.get("shots", {}).items():
+        if not isinstance(overrides, dict) or set(overrides) - set(LAYERS):
+            raise ValueError("镜头路由须为已知能力层对象")
+        for kind in overrides:
+            route_for(data, kind, shot_id)
+    if data.get("identity_policy", "warn") not in ("warn", "block"):
+        raise ValueError("identity_policy 仅支持 warn/block")
+    simulation = data.get("simulation", {})
+    if not isinstance(simulation, dict) or not isinstance(simulation.get("fail_first", {}), dict) or any(type(value) is not int or not 0 <= value <= 100 for value in simulation.get("fail_first", {}).values()):
+        raise ValueError("模拟失败次数须为 0..100 的整数")
     from .costs import money, provenance
     provenance(data.get("pricing"))
     if not isinstance(data["pricing"].get("currency"), str) or not data["pricing"]["currency"]:

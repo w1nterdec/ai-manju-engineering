@@ -4,7 +4,7 @@
 
 [GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
 
-**当前版本：0.8.0 / M7。** 四种业务画像、共享预算广告批次、参数化报价和商品时间点导出 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
+**当前版本：0.8.1 / M8。** 离线生产工作流收尾验证；只读看板评估完成并暂缓实现 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
 
 ## 从哪里开始
 
@@ -51,7 +51,7 @@ episode.snapshot.json     本次构建使用的完整设定和剧本
 shots/S001.md ...         逐镜头制作说明，包含人物、状态与剧情事实
 voice_plan.json           原文字幕、配音文本、读音提示与待分配音色
 subtitles.preview.srt     基于计划时间的字幕草稿，须按实测声音重新对齐
-tasks.json                生成、复核、剪辑的依赖计划；当前没有执行器
+tasks.json                兼容旧格式的任务计划，由新增执行器展开并持久执行
 ```
 
 输出目录不覆盖已有版本。再次构建请使用 `build/demo-v2` 等新目录。
@@ -78,9 +78,11 @@ python -m manju gate build/demo-v1 build/demo-v1/review.json --source examples/m
 
 ## 工程范围
 
-已实现：严格 JSON 读取、字段与引用检查、单轨对白时序、剧情节拍覆盖、状态链、系列共享设定、跨集连续性、确定性计划编译、逐文件摘要、人工复核记录检查、CLI、回归测试和 GitHub Actions 配置。
+已实现：原有编辑与构建检查；八层离线 mock 与镜头路由；并发执行、事务事件、恢复、取消、幂等和局部重建；成本估算、积分换算、四级预算与对账；素材版本、身份批准、授权记录、血缘；PCM/可选 ffprobe 探测、逐句实测 SRT 与转写筛查函数；通用剪辑交接、严格生产记录门禁、演示交付与独立校验；四业务画像、广告变体批次、修改记录和参数化报价。
 
-后续建设：真实 TTS/图像/视频适配器、媒体探测与对齐、任务队列、重试及预算、依赖失效重建、素材版本库、Web 工作台、真实成片评测。适配接口目前只是扩展契约，不代表这些服务已经接通。
+后续建设：真实服务适配与账单核对、真实视频技术集成、字级/口型对齐、真实素材和客户成片评测、批次级整体恢复与可信身份签名。只读看板已评估暂缓；不实现多租户 SaaS、转售、订阅计费、店铺连接或平台自动发布。当前只用 mock 验证工程流程，不能作为真实效果或商业交付成绩。
+
+生产/演示包的边界见 [交付规范](docs/delivery.md)，成本和作业流程见 [商业画像](docs/commercial/profiles-and-costs.md)。`--allow-network` 不会安装或启用真实适配器；本发行版始终拒绝真实生成调用。
 
 题材、画幅、风格与模型分开配置。题材差异见 [多题材手册](docs/genre-playbook.md)，模型能力证据见 [参考资料](docs/references.md)。
 

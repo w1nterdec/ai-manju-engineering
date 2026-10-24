@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+from datetime import date
+from fractions import Fraction
 
 from .assets import identity_report, lineage
 from .io import digest, digest_bytes, inside, read_json
@@ -56,7 +58,7 @@ def _provenance(bundle, review_path, provenance_path, final, rights):
         if not isinstance(actual_prompt, str) or not actual_prompt.strip() or digest_bytes(actual_prompt.encode("utf-8")) != source["prompt_sha256"]:
             raise ValueError("需保留实际提交的提示词及其正确摘要")
         asset_ids = source.get("input_asset_ids")
-        if not isinstance(asset_ids, list) or not asset_ids or not set(asset_ids) <= approved_assets:
+        if not isinstance(asset_ids, list) or not asset_ids or not all(isinstance(item, str) for item in asset_ids) or not set(asset_ids) <= approved_assets:
             raise ValueError("实际制作来源须引用已通过授权检查的素材")
         for artifact in shot["artifacts"]:
             if source.get(f"{artifact['kind']}_sha256") != artifact["sha256"]:
@@ -89,9 +91,22 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
         measured = probe(final)
         if measured["status"] != "measured" or not any(stream["codec_type"] == "video" for stream in measured["streams"]) or abs(measured["duration_ms"] - aligned["duration_ms"]) > config.get("media_spec", {}).get("duration_tolerance_ms", 250):
             raise ValueError("最终成片尚未通过实测或与实际时间轴不符")
+        specification = config.get("media_spec", {})
+        kinds = {stream["codec_type"] for stream in measured["streams"]}
+        for stream in measured["streams"]:
+            if stream["codec_type"] == "video":
+                if not stream.get("width") or not stream.get("height") or not stream.get("fps"):
+                    raise ValueError("最终成片缺少可验证的分辨率或帧率")
+                for key in ("width", "height", "fps"):
+                    if key in specification and (Fraction(str(stream[key])) != Fraction(str(specification[key]))):
+                        raise ValueError(f"最终成片 {key} 不符合配置规格")
+        if (manifest["planned_duration_ms"] and any(shot["has_dialogue"] for shot in manifest["shots"])) or specification.get("require_audio"):
+            if "audio" not in kinds:
+                raise ValueError("最终成片缺少要求的音轨")
         label = config.get("ai_label")
         if not isinstance(label, dict) or not all(isinstance(label.get(key), str) and label[key].strip() for key in ("platform", "disclosure", "verified_by", "as_of", "source_url")):
             raise ValueError("缺少经使用者核实的 AI 内容标识元数据")
+        date.fromisoformat(label["as_of"])
         source_record = _provenance(bundle, review, provenance, final, rights)
         from .business import business_checks
         business_record = business_checks(config, profile_checks, final)
@@ -116,11 +131,12 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
         stage = Path(temporary) / "package"
         stage.mkdir()
         handoff(bundle, stage / "handoff", alignment)
-        for name in ("manifest.json", "episode.snapshot.json", "voice_plan.json", "tasks.json"):
+        for name in ("manifest.json", "episode.snapshot.json", "voice_plan.json", "tasks.json", "subtitles.preview.srt"):
             destination = stage / "source" / name
             destination.parent.mkdir(exist_ok=True)
             shutil.copyfile(bundle / name, destination)
         shutil.copytree(bundle / "shots", stage / "source/shots")
+        load_bundle(stage / "source")
         atomic_json(stage / "quality.json", quality)
         atomic_json(stage / "rights-summary.json", rights)
         atomic_json(stage / "ai-label.json", {"mode": "demo" if demo else "production", "label": config.get("ai_label"), "notice": "以所在地区及投放平台最新要求为准，由使用者核实；本记录不是法律结论。"})
@@ -145,6 +161,8 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
                     destination = stage / relative
                     destination.parent.mkdir(exist_ok=True)
                     shutil.copyfile(path, destination)
+                    if digest(destination) != artifact["sha256"]:
+                        raise ValueError("复制过程中审核媒体发生变化")
                     media_index.append({"shot_id": shot["shot_id"], "kind": artifact["kind"], "path": relative, "sha256": artifact["sha256"]})
             atomic_json(stage / "reviewed-media-index.json", media_index)
             shutil.copyfile(review, stage / "human-review.json")
@@ -163,7 +181,11 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
                 shutil.copyfile(Path(run) / "cost-report.json", stage / "costs.json")
         if final:
             (stage / "final").mkdir()
-            shutil.copyfile(final, stage / "final" / (digest(final) + Path(final).suffix.lower()))
+            expected = source_record["final"]["sha256"] if source_record else digest(final)
+            destination = stage / "final" / (expected + Path(final).suffix.lower())
+            shutil.copyfile(final, destination)
+            if digest(destination) != expected:
+                raise ValueError("最终成片在打包期间改变")
         mode = "MOCK DEMO — 不得作为成片或客户验收" if demo else "生产交付记录包 — 仍须客户验收"
         files = sorted(path.relative_to(stage).as_posix() for path in stage.rglob("*") if path.is_file())
         page = "<!doctype html><meta charset='utf-8'><title>交付记录</title><h1>" + html.escape(mode) + "</h1><p>授权与 AI 标识仅为记录检查，以最新地区和平台要求为准。</p><ul>" + "".join(f"<li>{html.escape(name)}</li>" for name in files) + "</ul><p>成本默认不附；修改与任务事件见 rework-events.json（如有）。</p>"

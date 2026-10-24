@@ -21,6 +21,10 @@ def load_profile(name):
             raise ValueError("未知画像名称")
         path = ROOT / "configs/profiles" / f"{name}.json"
     data = read_json(path)
+    return validate_profile(data)
+
+
+def validate_profile(data):
     required = {"profile_version", "id", "deliverables", "required_checks", "metrics", "include_labor", "templates"}
     if not isinstance(data, dict) or set(data) != required or data["profile_version"] != "1.0" or not isinstance(data["id"], str) or not data["id"]:
         raise ValueError("业务画像契约无效")
@@ -36,6 +40,8 @@ def load_profile(name):
     for metric in data["metrics"]:
         if not isinstance(metric, dict) or set(metric) != {"id", "denominator", "multiplier"} or metric["denominator"] not in ("accepted_seconds", "units", "episodes", "skus", "variants"):
             raise ValueError("画像成本指标无效")
+        if not isinstance(metric["id"], str) or not metric["id"]:
+            raise ValueError("指标 ID 须为非空字符串")
         money(metric["multiplier"])
     return data
 
@@ -82,6 +88,7 @@ def unit_cost(profile, parameters):
 
 def business_checks(config, path, final):
     profile = config.get("business_profile_config") or load_profile(config.get("business_profile", "series_drama"))
+    profile = validate_profile(profile)
     if path is None:
         raise ValueError("生产交付缺少画像特有检查记录 --business-checks")
     record = read_json(path)

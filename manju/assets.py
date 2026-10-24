@@ -103,14 +103,16 @@ class AssetStore:
 
 
 def identity_report(episode, config, *, production=False):
-    used = {cid for shot in episode["shots"] for cid in shot["character_ids"]}
-    used.update(line["speaker_id"] for beat in episode["beats"] for line in beat["lines"])
+    visible = {cid for shot in episode["shots"] for cid in shot["character_ids"]}
+    spoken = {line["speaker_id"] for beat in episode["beats"] for line in beat["lines"]}
+    used = visible | spoken
     entries, problems = [], []
     store = AssetStore(config["asset_store"]) if config.get("asset_store") else None
     bindings = config.get("identities", {})
     if not isinstance(bindings, dict):
         raise ValueError("identities 须为角色引用对象")
     for cid in sorted(used):
+        kinds = set()
         binding = bindings.get(cid)
         if not isinstance(binding, dict) or not isinstance(binding.get("asset_ids"), list) or not binding["asset_ids"]:
             problems.append(f"{cid} 缺少身份/音色资产引用")
@@ -124,6 +126,7 @@ def identity_report(episode, config, *, production=False):
             try:
                 record = store.get(asset_id)
                 entries.append(record)
+                kinds.add(record["kind"])
                 if production:
                     checked = store.check(asset_id, scope=config.get("required_rights_scope", "commercial_delivery"), as_of=config.get("rights_as_of"))
                     problems.extend(f"{cid}: {issue}" for issue in checked["problems"])
@@ -131,6 +134,10 @@ def identity_report(episode, config, *, production=False):
                     problems.append(f"{cid} 素材未批准")
             except (OSError, ValueError) as exc:
                 problems.append(f"{cid}: {exc}")
+        if production and cid in visible and "identity" not in kinds:
+            problems.append(f"{cid}: 缺少已记录的视觉身份资产")
+        if production and cid in spoken and "voice" not in kinds:
+            problems.append(f"{cid}: 缺少已记录的音色/声音授权资产")
     for asset_id in config.get("additional_assets", []):
         if store is None:
             problems.append("额外素材缺少 asset_store")

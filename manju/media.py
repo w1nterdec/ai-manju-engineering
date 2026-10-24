@@ -22,6 +22,13 @@ def probe(path, ffprobe=None):
     if path.suffix.lower() == ".wav":
         try:
             with wave.open(str(path), "rb") as audio:
+                remaining = audio.getnframes()
+                frame_size = audio.getnchannels() * audio.getsampwidth()
+                while remaining:
+                    frames = min(remaining, 65536)
+                    if len(audio.readframes(frames)) != frames * frame_size:
+                        raise wave.Error("PCM 数据被截断")
+                    remaining -= frames
                 result.update(status="measured", backend="stdlib.wave", duration_ms=round(Fraction(audio.getnframes() * 1000, audio.getframerate())), streams=[{"codec_type": "audio", "sample_rate": audio.getframerate(), "channels": audio.getnchannels()}])
                 return result
         except (wave.Error, EOFError):
@@ -31,7 +38,7 @@ def probe(path, ffprobe=None):
         result["reason"] = "未安装可选 ffprobe；无法自动确认视频技术规格，不能视为通过"
         return result
     try:
-        process = subprocess.run([str(executable), "-v", "error", "-show_format", "-show_streams", "-output_format", "json", str(path)], capture_output=True, timeout=20, text=True, encoding="utf-8")
+        process = subprocess.run([str(executable), "-v", "error", "-protocol_whitelist", "file,pipe", "-show_format", "-show_streams", "-output_format", "json", str(path)], capture_output=True, timeout=20, text=True, encoding="utf-8")
         if process.returncode:
             raise ValueError("ffprobe 无法读取媒体")
         data = json.loads(process.stdout)
@@ -105,9 +112,17 @@ def quality_report(bundle, review_path=None, config=None, run=None):
     measurements, issues = [], []
     if review_path:
         review = read_json(review_path)
-        for shot in review.get("shots", []):
+        records = review.get("shots", []) if isinstance(review, dict) else []
+        if not isinstance(records, list):
+            records = []
+        for shot in records:
+            if not isinstance(shot, dict) or not isinstance(shot.get("artifacts"), list):
+                issues.append("人工复核记录结构无效")
+                continue
             for artifact in shot.get("artifacts", []):
                 try:
+                    if not isinstance(artifact, dict):
+                        raise ValueError("媒体记录结构无效")
                     measured = probe(inside(bundle, artifact["path"]))
                     measured.update(shot_id=shot["shot_id"], kind=artifact["kind"])
                     measurements.append(measured)
@@ -125,8 +140,10 @@ def quality_report(bundle, review_path=None, config=None, run=None):
                     for stream in measured["streams"]:
                         if stream["codec_type"] == "video":
                             for key in ("width", "height", "fps"):
-                                if key in specification and str(stream.get(key)) != str(specification[key]):
-                                    issues.append(f"{shot['shot_id']}: {key} 与交付规格不同")
+                                if key in specification:
+                                    matches = Fraction(str(stream.get(key, "0"))) == Fraction(str(specification[key])) if key == "fps" else str(stream.get(key)) == str(specification[key])
+                                    if not matches:
+                                        issues.append(f"{shot['shot_id']}: {key} 与交付规格不同")
                             if specification.get("require_audio") and "audio" not in kinds:
                                 issues.append(f"{shot['shot_id']}: 缺少要求的内嵌音轨")
                 except (OSError, ValueError, KeyError, StopIteration) as exc:

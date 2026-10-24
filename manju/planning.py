@@ -15,6 +15,8 @@ def make_plan(bundle, config=None):
     config = config or load_config()
     episode = read_json(bundle / "episode.snapshot.json")
     shots = {shot["id"]: shot for shot in episode["shots"]}
+    if set(config["routes"].get("shots", {})) - shots.keys():
+        raise ValueError("路由配置引用未知镜头 ID")
     voices = {line["line_id"]: line for line in read_json(bundle / "voice_plan.json")}
     chars = {char["id"]: char for char in episode["characters"]}
     identities = identity_report(episode, config)

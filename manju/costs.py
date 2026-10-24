@@ -146,7 +146,8 @@ class CostLedger:
             raise
 
     def report(self):
-        rows = [dict(row) for row in self.db.execute("SELECT * FROM ledger ORDER BY rowid")]
+        project = str(self.config.get("scope", {}).get("project", "local-project"))
+        rows = [dict(row) for row in self.db.execute("SELECT * FROM ledger WHERE project=? ORDER BY rowid", (project,))]
         totals = {}
         for row in rows:
             total = totals.setdefault(row["currency"], {"actual": Decimal(0), "reserved": Decimal(0), "effective": Decimal(0)})

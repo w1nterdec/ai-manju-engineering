@@ -28,7 +28,9 @@ def main():
             if any(re.search(pattern, content) for pattern in PATTERNS):
                 errors.append(f"possible secret (value redacted): {name}")
     # Check additions in all commits on this branch plus staged/working diffs.
-    diffs = [subprocess.check_output(["git", "diff", "origin/main...HEAD"]), subprocess.check_output(["git", "diff", "HEAD"])]
+    commits = subprocess.check_output(["git", "rev-list", "origin/main..HEAD"]).decode().split()
+    diffs = [subprocess.check_output(["git", "show", "--format=", "--no-ext-diff", commit]) for commit in commits]
+    diffs.append(subprocess.check_output(["git", "diff", "HEAD"]))
     for diff in diffs:
         additions = b"\n".join(line[1:] for line in diff.splitlines() if line.startswith(b"+") and not line.startswith(b"+++"))
         if any(re.search(pattern, additions) for pattern in PATTERNS):
