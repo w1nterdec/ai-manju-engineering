@@ -30,7 +30,19 @@ def main():
     # Check additions in all commits on this branch plus staged/working diffs.
     commits = subprocess.check_output(["git", "rev-list", "origin/main..HEAD"]).decode().split()
     diffs = [subprocess.check_output(["git", "show", "--format=", "--no-ext-diff", commit]) for commit in commits]
-    diffs.append(subprocess.check_output(["git", "diff", "HEAD"]))
+    diffs.append(subprocess.check_output(["git", "diff", "--no-ext-diff", "HEAD"]))
+    diffs.append(subprocess.check_output(["git", "diff", "--cached", "--no-ext-diff"]))
+    for commit in commits:
+        changed = subprocess.check_output(["git", "diff-tree", "--no-commit-id", "-r", "--name-only", "--diff-filter=AM", "-z", commit]).decode("utf-8").split("\0")
+        if any(Path(name).name == ".env" or (Path(name).name.startswith(".env.") and Path(name).name != ".env.example") for name in changed if name):
+            errors.append("forbidden environment file in outgoing history")
+    objects = subprocess.check_output(["git", "rev-list", "--objects", "origin/main..HEAD"])
+    object_ids = b"\n".join(line.split(b" ", 1)[0] for line in objects.splitlines()) + b"\n"
+    sizes = subprocess.run(["git", "cat-file", "--batch-check=%(objecttype) %(objectsize)"], input=object_ids, capture_output=True, check=True).stdout
+    if any(line.endswith(b" missing") for line in sizes.splitlines()):
+        errors.append("unable to inspect an outgoing Git object")
+    if any(line.startswith(b"blob ") and int(line.split()[1]) > 5 * 1024 * 1024 for line in sizes.splitlines()):
+        errors.append("outgoing history contains a blob over 5 MiB")
     for diff in diffs:
         additions = b"\n".join(line[1:] for line in diff.splitlines() if line.startswith(b"+") and not line.startswith(b"+++"))
         if any(re.search(pattern, additions) for pattern in PATTERNS):

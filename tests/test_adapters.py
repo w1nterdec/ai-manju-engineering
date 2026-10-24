@@ -40,4 +40,4 @@ class AdapterTests(unittest.TestCase):
 
     def test_mock_never_claims_real_model(self):
         with tempfile.TemporaryDirectory() as directory, self.assertRaises(ValueError):
-            MockProvider().generate(WorkRequest("test", "video", "real-model", "safe-key", {}), directory)
+            MockProvider().generate(WorkRequest("test", "video", "real-model", "0" * 64, {}), directory)
