@@ -106,6 +106,16 @@ def load_config(path=None):
         raise ValueError("routes 须包含 defaults 与可选 shots 对象")
     for kind in LAYERS:
         route_for(data, kind)
+    from .costs import money, provenance
+    provenance(data.get("pricing"))
+    if not isinstance(data["pricing"].get("currency"), str) or not data["pricing"]["currency"]:
+        raise ValueError("pricing.currency 必须为非空字符串")
+    if not isinstance(data["pricing"].get("rates"), dict) or not data["pricing"]["rates"]:
+        raise ValueError("pricing.rates 必须为非空对象")
+    if not isinstance(data.get("budgets"), dict) or not {"project", "episode", "shot", "batch"} <= data["budgets"].keys():
+        raise ValueError("须显式配置四级预算")
+    for value in data["budgets"].values():
+        money(value)
     return data
 
 
@@ -114,8 +124,11 @@ def route_for(config, kind, shot_id=None):
     if not isinstance(route, list) or not route:
         raise ValueError(f"缺少能力层路由：{kind}")
     for entry in route:
-        if not isinstance(entry, dict) or set(entry) != {"provider", "model"} or not all(isinstance(x, str) and x for x in entry.values()):
+        if not isinstance(entry, dict) or not {"provider", "model"} <= entry.keys() or entry.keys() - {"provider", "model", "parameters"} or not all(isinstance(entry[k], str) and entry[k] for k in ("provider", "model")):
             raise ValueError("每个路由须包含非空 provider 与 model")
+        parameters = entry.get("parameters", {})
+        if not isinstance(parameters, dict) or set(parameters) & {"shot", "voice", "project", "duration_ms"}:
+            raise ValueError("路由参数不得覆盖剧本、台词或计划时长")
     return route
 
 

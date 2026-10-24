@@ -5,6 +5,7 @@ from .adapters import load_config, registry, route_for
 from .io import digest, read_json
 from .review import load_bundle
 from .safeio import fingerprint
+from .costs import estimate
 
 
 def make_plan(bundle, config=None):
@@ -52,7 +53,7 @@ def make_plan(bundle, config=None):
         dependencies = [resolve(dep) for dep in task["depends_on"]]
         route = [] if task["kind"] == "human_review" else route_for(config, task["kind"], task["shot_id"])
         for candidate in route:
-            providers.get(candidate["provider"]).capabilities.require(task["kind"], task["parameters"])
+            providers.get(candidate["provider"]).capabilities.require(task["kind"], {**task["parameters"], **candidate.get("parameters", {})})
         task["route"] = route
         task["key"] = fingerprint({"id": task_id, "parameters": task["parameters"], "route": route, "dependencies": dependencies})
         visiting.remove(task_id)
@@ -62,5 +63,7 @@ def make_plan(bundle, config=None):
     for task in tasks:
         resolve(task["id"])
     result = {"plan_version": "1.0", "mock": all(providers.get(route["provider"]).capabilities.offline for task in tasks for route in task["route"]), "manifest_sha256": digest(bundle / "manifest.json"), "config_sha256": fingerprint(config), "tasks": tasks}
+    result["project_id"] = manifest["project_id"]
+    result["estimate"] = estimate(result, config)
     result["plan_id"] = fingerprint(result)
     return result

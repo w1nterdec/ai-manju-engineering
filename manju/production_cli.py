@@ -22,6 +22,7 @@ def add_commands(commands):
     plan.add_argument("bundle")
     plan.add_argument("--config")
     plan.add_argument("--out", required=True)
+    plan.add_argument("--estimate", action="store_true")
     plan.set_defaults(handler=plan_command)
     run = commands.add_parser("run", help="离线执行与恢复，不调用真实生成服务")
     run.add_argument("bundle")
@@ -46,6 +47,10 @@ def add_commands(commands):
     approval.add_argument("--reviewer", required=True)
     approval.add_argument("--note", required=True)
     approval.set_defaults(handler=lambda args: (approve(args.directory, args.task_id, args.reviewer, args.note) or emit({"recorded": True})))
+    cost = commands.add_parser("cost-report", help="读取保留预留/释放/模拟实际值的成本台账")
+    cost.add_argument("directory")
+    cost.add_argument("--config")
+    cost.set_defaults(handler=cost_command)
 
 
 def emit(value):
@@ -65,7 +70,7 @@ def plan_command(args):
         raise ValueError("预览文件已存在，请选择新版本")
     plan = make_plan(args.bundle, load_config(args.config))
     atomic_json(destination, plan)
-    return emit({"plan_id": plan["plan_id"], "mock": plan["mock"], "task_count": len(plan["tasks"]), "out": str(destination)})
+    return emit({"plan_id": plan["plan_id"], "mock": plan["mock"], "task_count": len(plan["tasks"]), "estimate": plan["estimate"] if args.estimate else None, "out": str(destination)})
 
 
 def run_command(args):
@@ -97,3 +102,16 @@ def status_command(args):
         return emit(engine.state())
     finally:
         engine.close()
+
+
+def cost_command(args):
+    from .costs import CostLedger
+    config = load_config(args.config)
+    path = config.get("budget_account", Path(args.directory).parent / ".manju" / "costs.sqlite3")
+    if not Path(path).is_file():
+        raise ValueError("台账不存在")
+    ledger = CostLedger(path, config)
+    try:
+        return emit(ledger.report())
+    finally:
+        ledger.close()

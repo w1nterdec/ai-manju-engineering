@@ -5,10 +5,12 @@ from pathlib import Path
 import json
 import sqlite3
 import time
+from decimal import Decimal
 
 from .adapters import WorkRequest, registry
 from .io import digest, inside
 from .safeio import atomic_json, canonical, redact, run_lock
+from .costs import BudgetExceeded, CostLedger, price, money
 
 
 class Engine:
@@ -26,9 +28,11 @@ class Engine:
         CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT);
         """)
         self.db.commit()
+        self.costs = CostLedger(config.get("budget_account", self.root.parent / ".manju" / "costs.sqlite3"), config)
 
     def close(self):
         self.db.close()
+        self.costs.close()
 
     def event(self, task_id, event, payload=None):
         self.db.execute("INSERT INTO events(at,task_id,event,payload) VALUES(?,?,?,?)", (datetime.now(timezone.utc).isoformat(), task_id, event, canonical(redact(payload or {})).decode("utf-8")))
@@ -60,7 +64,7 @@ class Engine:
             elif old["state"] == "running":
                 offline = all(self.registry.get(route["provider"]).capabilities.offline for route in task["route"])
                 next_state = "pending" if offline else "needs_review"
-                self.db.execute("UPDATE tasks SET state=? WHERE id=?", (next_state, task["id"]))
+                self.db.execute("UPDATE tasks SET state=?,attempts=MAX(0,attempts-1) WHERE id=?", (next_state, task["id"]))
                 self.event(task["id"], "recovered", {"state": next_state, "reason": "idempotent offline recovery" if offline else "provider reconciliation required"})
         self.db.execute("INSERT OR REPLACE INTO meta VALUES('plan_id',?)", (plan["plan_id"],))
         self.db.commit()
@@ -75,7 +79,7 @@ class Engine:
             provider = self.registry.get(candidate["provider"])
             if not provider.capabilities.offline:
                 raise ValueError("本版本执行器禁止真实生成调用；需经验证的真实适配器与调用准入")
-            request = WorkRequest(task["id"], task["kind"], candidate["model"], task["key"], task["parameters"])
+            request = WorkRequest(task["id"], task["kind"], candidate["model"], task["key"], {**task["parameters"], **candidate.get("parameters", {})})
             try:
                 result = provider.generate(request, self.root / "artifacts")
                 result["provider"] = candidate["provider"]
@@ -94,14 +98,16 @@ class Engine:
             raise ValueError("只有全 mock 计划允许模拟审核")
         with run_lock(self.root):
             self.sync(plan)
+            retry_limits = {}
             if retry_failed:
-                self.db.execute("UPDATE tasks SET state='pending',attempts=0 WHERE state='failed'")
+                retry_limits = {key: row["attempts"] + attempts for key, row in self.state().items() if row["state"] == "failed"}
+                self.db.execute("UPDATE tasks SET state='pending' WHERE state='failed'")
                 self.event(None, "retry_failed", {"note": "explicit manual retry; prior costs retained"})
                 self.db.commit()
-            in_flight, ready_at, completed = {}, {}, 0
+            in_flight, ready_at, completed, halted = {}, {}, 0, False
             with ThreadPoolExecutor(max_workers=concurrency) as pool:
                 while True:
-                    if (self.root / "cancel.json").exists() or (stop_after is not None and completed >= stop_after):
+                    if halted or (self.root / "cancel.json").exists() or (stop_after is not None and completed >= stop_after):
                         self.event(None, "paused", {"reason": "cancel requested or stop limit"})
                         self.db.commit()
                         # In-flight work finishes and is journaled before returning.
@@ -128,10 +134,18 @@ class Engine:
                             if row["state"] == "needs_review" or time.monotonic() < ready_at.get(task["id"], 0):
                                 continue
                             attempt = row["attempts"] + 1
+                            try:
+                                reservation = self.costs.reserve(str(self.root.resolve()), plan, task, attempt)
+                            except BudgetExceeded as exc:
+                                self.db.execute("UPDATE tasks SET state='failed',error=? WHERE id=?", (str(exc), task["id"]))
+                                self.event(task["id"], "budget_blocked", {"error": str(exc)})
+                                self.db.commit()
+                                halted = True
+                                break
                             self.db.execute("UPDATE tasks SET state='running',attempts=?,error=NULL WHERE id=?", (attempt, task["id"]))
                             self.event(task["id"], "running", {"attempt": attempt, "key": task["key"]})
                             self.db.commit()
-                            in_flight[pool.submit(self._generate, task, attempt)] = (task, attempt)
+                            in_flight[pool.submit(self._generate, task, attempt)] = (task, attempt, reservation)
                     if not in_flight:
                         rows = self.state()
                         runnable = any(row["state"] in ("pending", "stale") and all(rows[d]["state"] == "succeeded" for d in task["depends_on"]) for task in plan["tasks"] for row in [rows[task["id"]]])
@@ -144,14 +158,21 @@ class Engine:
                         continue
                     finished, _ = wait(in_flight, timeout=0.05, return_when=FIRST_COMPLETED)
                     for future in finished:
-                        task, attempt = in_flight.pop(future)
+                        task, attempt, reservation = in_flight.pop(future)
                         try:
                             result = future.result()
+                            charged = Decimal(0)
+                            for candidate in task["route"]:
+                                charged += money(price(self.config, task, candidate)["amount"])
+                                if candidate["provider"] == result["provider"] and candidate["model"] == result["model"]:
+                                    break
+                            self.costs.settle(reservation, True, str(charged))
                             self.db.execute("UPDATE tasks SET state='succeeded',result=? WHERE id=?", (canonical(result).decode(), task["id"]))
                             self.event(task["id"], "succeeded", result)
                             completed += 1
                         except (OSError, ValueError, RuntimeError) as exc:
-                            state = "pending" if attempt < attempts else "failed"
+                            self.costs.settle(reservation, False)
+                            state = "pending" if attempt < retry_limits.get(task["id"], attempts) else "failed"
                             self.db.execute("UPDATE tasks SET state=?,error=? WHERE id=?", (state, redact(str(exc)), task["id"]))
                             self.event(task["id"], state, {"attempt": attempt, "error": str(exc)})
                             ready_at[task["id"]] = time.monotonic() + min(60, backoff * 2 ** (attempt - 1))
@@ -160,6 +181,7 @@ class Engine:
             atomic_json(self.root / "status.json", result)
             events = [dict(row) for row in self.db.execute("SELECT * FROM events ORDER BY seq")]
             atomic_json(self.root / "events.json", events)
+            atomic_json(self.root / "cost-report.json", self.costs.report())
             return result
 
 
