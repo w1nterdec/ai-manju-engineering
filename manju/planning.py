@@ -62,7 +62,8 @@ def make_plan(bundle, config=None):
         for candidate in route:
             providers.get(candidate["provider"]).capabilities.require(task["kind"], {**task["parameters"], **candidate.get("parameters", {})})
         task["route"] = route
-        task["key"] = fingerprint({"id": task_id, "parameters": task["parameters"], "route": route, "dependencies": dependencies})
+        versions = [providers.get(candidate["provider"]).capabilities.revision for candidate in route]
+        task["key"] = fingerprint({"id": task_id, "parameters": task["parameters"], "route": route, "adapter_versions": versions, "dependencies": dependencies})
         visiting.remove(task_id)
         done.add(task_id)
         return task["key"]

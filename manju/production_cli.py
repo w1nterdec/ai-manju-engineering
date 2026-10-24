@@ -74,6 +74,25 @@ def add_commands(commands):
     trace.add_argument("directory")
     trace.add_argument("task_id")
     trace.set_defaults(handler=lineage_command)
+    probe_parser = commands.add_parser("probe", help="本地媒体探测，缺 ffprobe 时明确降级")
+    probe_parser.add_argument("file")
+    probe_parser.set_defaults(handler=probe_command)
+    alignment = commands.add_parser("align", help="按实测逐句音频重新编排字幕时间轴")
+    alignment.add_argument("bundle")
+    alignment.add_argument("audio_map")
+    alignment.add_argument("--out", required=True)
+    alignment.set_defaults(handler=align_command)
+    quality = commands.add_parser("quality-report", help="合并自动技术检查与人工记录，二者明确分开")
+    quality.add_argument("bundle")
+    quality.add_argument("--review")
+    quality.add_argument("--run")
+    quality.add_argument("--config")
+    quality.add_argument("--out", required=True)
+    quality.set_defaults(handler=quality_command)
+    audio_map = commands.add_parser("demo-audio-map", help="为 mock 静音 WAV 生成明确标记的测试映射")
+    audio_map.add_argument("directory")
+    audio_map.add_argument("--out", required=True)
+    audio_map.set_defaults(handler=audio_map_command)
 
 
 def emit(value):
@@ -160,3 +179,45 @@ def asset_check_command(args):
 def lineage_command(args):
     from .assets import lineage
     return emit(lineage(args.bundle, args.directory, args.task_id))
+
+
+def probe_command(args):
+    from .media import probe
+    result = probe(args.file)
+    emit(result)
+    return int(result["status"] != "measured")
+
+
+def align_command(args):
+    from .media import align
+    result = align(args.bundle, args.audio_map, args.out)
+    return emit({"mock": result["mock"], "duration_ms": result["duration_ms"], "out": args.out})
+
+
+def quality_command(args):
+    from .media import quality_report
+    result = quality_report(args.bundle, args.review, load_config(args.config), args.run)
+    if Path(args.out).exists():
+        raise ValueError("质量报告已存在，选择新版本")
+    atomic_json(args.out, result)
+    return emit({"production_ready": result["production_ready"], "out": args.out})
+
+
+def audio_map_command(args):
+    import os
+    from .io import inside
+    destination = Path(args.out)
+    if destination.exists():
+        raise ValueError("音频映射已存在")
+    status = read_json(Path(args.directory) / "status.json")
+    lines = {}
+    if not status.get("mock"):
+        raise ValueError("此命令只允许 mock 静音 WAV")
+    for task_id, task in status["tasks"].items():
+        if task_id.startswith("tts:") and task["state"] == "succeeded":
+            result = json.loads(task["result"])
+            relative = os.path.relpath(Path(args.directory) / "artifacts" / result["media_path"], destination.parent).replace("\\", "/")
+            inside(destination.parent, relative)
+            lines[task_id.split(":", 1)[1]] = relative
+    atomic_json(destination, {"audio_map_version": "1.0", "mock": True, "lines": lines})
+    return emit({"mock": True, "lines": len(lines)})

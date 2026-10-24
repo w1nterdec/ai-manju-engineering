@@ -2,6 +2,7 @@
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Mapping, Tuple
+import wave
 
 from .io import digest, read_json
 from .safeio import atomic_json, fingerprint, redact
@@ -19,6 +20,7 @@ class CapabilitySpec:
     pricing_unit: str
     offline: bool
     aggregate: bool = False
+    revision: str = "mock-v2-pcm"
 
     def require(self, kind, parameters):
         if kind not in self.layers:
@@ -61,7 +63,22 @@ class MockProvider:
                 raise ValueError("幂等键冲突：已有产物内容不同")
         else:
             atomic_json(output, metadata)
-        return {"mock": True, "job_id": f"mock-{request.idempotency_key}", "model": request.model, "path": output.name, "sha256": digest(output), "parameters": metadata["parameters"]}
+        result = {"mock": True, "job_id": f"mock-{request.idempotency_key}", "model": request.model, "path": output.name, "sha256": digest(output), "parameters": metadata["parameters"]}
+        if request.kind == "tts":
+            audio = output.with_suffix(".wav")
+            if not audio.exists():
+                duration_ms = request.parameters.get("duration_ms", 1000)
+                with wave.open(str(audio), "wb") as stream:
+                    stream.setnchannels(1)
+                    stream.setsampwidth(2)
+                    stream.setframerate(8000)
+                    remaining = duration_ms * 8
+                    while remaining:
+                        frames = min(remaining, 8000)
+                        stream.writeframesraw(b"\0\0" * frames)
+                        remaining -= frames
+            result.update(media_path=audio.name, media_sha256=digest(audio), notice="mock 静音 WAV，仅供实测时间轴测试，不是配音")
+        return result
 
 
 class AggregateMockProvider(MockProvider):

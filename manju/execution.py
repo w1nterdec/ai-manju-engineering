@@ -49,6 +49,10 @@ class Engine:
                     path = inside(self.root / "artifacts", result["path"])
                     if not path.is_file() or digest(path) != result["sha256"]:
                         raise ValueError("已成功任务的产物缺失或被修改，拒绝复用")
+                if "media_path" in result:
+                    path = inside(self.root / "artifacts", result["media_path"])
+                    if not path.is_file() or digest(path) != result["media_sha256"]:
+                        raise ValueError("已成功任务的实际媒体已被修改")
         current_ids = {task["id"] for task in plan["tasks"]}
         for old in rows.keys() - current_ids:
             self.db.execute("DELETE FROM tasks WHERE id=?", (old,))

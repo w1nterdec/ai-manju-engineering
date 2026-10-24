@@ -4,7 +4,7 @@
 
 [GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
 
-**当前版本：0.5.0 / M4。** 内容寻址素材、不可变批准版本、来源血缘和授权记录交付门禁 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
+**当前版本：0.6.0 / M5。** 本地媒体探测、实测音频字幕时间轴与自动人工分栏质量报告 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
 
 ## 从哪里开始
 
@@ -25,6 +25,9 @@ python -m manju check-series examples/midnight_letter/series/series.json
 python -m manju plan build/demo-v1 --out build/preview.json --estimate
 python -m manju run build/demo-v1 --out build/run --preview build/preview.json --auto-review-mock
 python -m manju cost-report build/run
+python -m manju demo-audio-map build/run --out build/audio-map.json
+python -m manju align build/demo-v1 build/audio-map.json --out build/aligned
+python -m manju quality-report build/demo-v1 --run build/run --out build/quality.json
 python -m unittest discover -s tests -v
 ```
 
