@@ -9,6 +9,8 @@ from .io import digest
 from .project import load_episode, validate_series
 from .review import gate, review_template
 from .validation import validate
+from .production_cli import add_commands
+from .safeio import redact
 
 
 def report(findings, as_json, success):
@@ -47,8 +49,11 @@ def main(argv=None):
     review.add_argument("--json", action="store_true")
     hash_command = commands.add_parser("hash", help="计算产物 SHA-256，写入复核记录")
     hash_command.add_argument("file")
+    add_commands(commands)
     args = parser.parse_args(argv)
     try:
+        if hasattr(args, "handler"):
+            return args.handler(args)
         if args.command == "init":
             init_episode(args.destination)
             print(f"已创建：{args.destination}")
@@ -74,8 +79,8 @@ def main(argv=None):
             print(digest(args.file))
     except (OSError, ValueError) as exc:
         if getattr(args, "json", False):
-            print(json.dumps({"passed": False, "error": str(exc)}, ensure_ascii=False))
+            print(json.dumps({"passed": False, "error": redact(str(exc))}, ensure_ascii=False))
         else:
-            print(f"ERROR: {exc}", file=sys.stderr)
+            print(f"ERROR: {redact(str(exc))}", file=sys.stderr)
         return 2
     return 0

@@ -4,7 +4,7 @@
 
 [GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
 
-**当前版本：0.1 工程基础版。** 已提供本地检查、制作计划编译、共享剧集设定和绑定文件摘要的人工复核工具。尚未接入生成模型，未提供生成成片，未经过行业水平对比评测。未来能力见 [路线图](ROADMAP.md)。
+**当前版本：0.2.0 / M1。** 离线能力注册、全层 mock、镜头路由和适配器契约测试 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
 
 ## 从哪里开始
 

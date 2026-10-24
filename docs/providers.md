@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-`manju/providers.py` 仅定义 `Capabilities`、`GenerationRequest`、`GenerationResult` 和 `Provider` 协议，没有真实模型适配器。当前 CLI 不调用云服务，不接受 API 密钥，也不会产生合成费用。
+旧 `manju/providers.py` 保持兼容。新增 `adapters.py` 提供八个能力层、聚合 mock、注册表、逐镜头路由与离线契约套件。`python -m manju providers` 查看能力；`adapter-test --out 目录` 验证适配器。没有真实模型适配器，CLI 不调用云服务、不需要密钥、不产生合成费用。
 
 先跑通一个镜头，再选择真实供应商。工具品牌只是候选，选择依据是可验证能力、质量、成本、地区可用性、授权与可维护性，不依据宣传中的“最好”。
 
