@@ -1,0 +1,47 @@
+{
+  "audit_version": "1.0",
+  "as_of": "2026-10-25",
+  "subject_version": "0.8.2",
+  "subject_git_head": "d25bbd623b66045edec87d2c5a1b60b63740fbf9",
+  "mock_only": true,
+  "source_fingerprints": {
+    "manju/assets.py": "40807bee3c4cb32deb02fd800b3d692fe5a6fe51d4727f58928c63efedb0d96f",
+    "manju/business.py": "d666dc8ef29dd2bc88fec7d6483238c5d6f513d4570b6e8382652b245e34b500",
+    "manju/planning.py": "23878c8a1f579ef4e1a08a128eca16e3ab4ea46b31eee15e7284f81bf7a732ed",
+    "manju/delivery.py": "2206d27e44f0e8e2d01577ac4bf4fa83c67d111e345713a1a510daa854b5545d",
+    "manju/adapters.py": "0de44dfe0394ede01b2b03802d3be6fe3d23f49ff1604381373a1eb517600b62",
+    "manju/execution.py": "a0a233e2ff354058a959b867df98bbef9c0b216343bb9587e98b32b11dc22299",
+    "manju/costs.py": "e2a0a4a50ed81d05d6de6d0b448907e6418d2b3d4585b32118bc78abcb4e1280",
+    "manju/safeio.py": "eba996e66038c9c1cd353f6294764f7578837171f302e5fcb78a077f3a9fd9de"
+  },
+  "results": [
+    {
+      "id": "A1",
+      "reproduced": true,
+      "partial_blob_persisted": true,
+      "retry_blocked": true
+    },
+    {
+      "id": "A2",
+      "reproduced": true,
+      "core_config_overwritten": true,
+      "generated_config_invalid": true
+    },
+    {
+      "id": "A3",
+      "reproduced": true,
+      "plan_changed": true,
+      "task_keys_unchanged": true,
+      "stale_tasks": []
+    },
+    {
+      "id": "A4",
+      "reproduced": true,
+      "demo_package_accepted": true,
+      "outer_integrity_passed": true,
+      "lineage_content_mismatch": true,
+      "scope": "mock package only; no actual production bypass demonstrated"
+    }
+  ],
+  "notice": "Historical audit observations; no real media generation, rights approval or credentials. Convert these scenarios to regression assertions when fixing."
+}
