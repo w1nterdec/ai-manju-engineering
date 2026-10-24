@@ -4,7 +4,8 @@ import unittest
 from unittest.mock import patch
 
 from manju.delivery import package, verify_package
-from manju.io import digest, digest_bytes, write_json
+from manju.io import digest, digest_bytes, read_json, write_json
+from manju.media import alignment_subtitles
 from manju.review import review_template
 import test_execution as execution_fixture
 
@@ -33,8 +34,18 @@ class ProductionRecordTests(unittest.TestCase):
         final.write_bytes(b"SYNTHETIC - not an actual video")
         aligned = self.root / "alignment"
         aligned.mkdir()
-        write_json(aligned / "alignment.json", {"alignment_version": "1.0", "mock": False, "fixture": True, "manifest_sha256": digest(self.bundle / "manifest.json"), "duration_ms": 32000, "timeline": []})
-        (aligned / "subtitles.measured.srt").write_text("synthetic fixture", encoding="utf-8")
+        voices = {line["line_id"]: line for line in read_json(self.bundle / "voice_plan.json")}
+        measurements, timeline = {}, []
+        for index, shot in enumerate(review["shots"]):
+            line_id = f"L{index + 1:03}"
+            voice = voices[line_id]
+            audio_sha = next(artifact["sha256"] for artifact in shot["artifacts"] if artifact["kind"] == "audio")
+            cue = {"line_id": line_id, "start_ms": voice["planned_start_ms"], "end_ms": voice["planned_end_ms"], "audio_sha256": audio_sha}
+            measurements[line_id] = {"status": "measured", "fixture": True, "sha256": audio_sha, "duration_ms": cue["end_ms"] - cue["start_ms"]}
+            timeline.append({"shot_id": shot["shot_id"], "start_ms": index * 8000, "duration_ms": 8000, "requires_video_retiming": False, "cues": [cue]})
+        alignment_record = {"alignment_version": "1.0", "mock": False, "fixture": True, "manifest_sha256": digest(self.bundle / "manifest.json"), "duration_ms": 32000, "timeline": timeline, "measurements": measurements}
+        write_json(aligned / "alignment.json", alignment_record)
+        (aligned / "subtitles.measured.srt").write_bytes(alignment_subtitles(self.bundle, alignment_record).encode("utf-8"))
         provenance = self.root / "provenance.json"
         write_json(provenance, {"provenance_version": "1.0", "manifest_sha256": digest(self.bundle / "manifest.json"), "shots": sources, "final": {"sha256": digest(final), "editor": "UNIT_FIXTURE", "tool": "UNIT_FIXTURE"}})
         self.config["ai_label"] = {"platform": "UNIT_TEST", "disclosure": "synthetic record test only", "verified_by": "UNIT_FIXTURE", "as_of": "2026-10-24", "source_url": "https://example.invalid/fixture"}
@@ -62,4 +73,13 @@ class ProductionRecordTests(unittest.TestCase):
         rights = {"passed": True, "assets": [{"asset_id": "a" * 64}]}
         measured = {"status": "measured", "duration_ms": 32000, "streams": [{"codec_type": "video", "width": 128, "height": 72, "fps": "30"}]}
         with patch("manju.delivery.identity_report", return_value=rights), patch("manju.delivery.quality_report", return_value={"production_ready": True}), patch("manju.delivery.probe", return_value=measured), self.assertRaises(ValueError):
+            package(self.bundle, self.root / "package", self.config, **inputs)
+
+    def test_empty_alignment_cannot_bypass_other_injected_passes(self):
+        inputs = self.fixture()
+        record_path = inputs["alignment"] / "alignment.json"
+        record = read_json(record_path)
+        record["timeline"] = []
+        write_json(record_path, record)
+        with patch("manju.delivery.identity_report", return_value={"passed": True}), patch("manju.delivery.quality_report", return_value={"production_ready": True}), self.assertRaises(ValueError):
             package(self.bundle, self.root / "package", self.config, **inputs)

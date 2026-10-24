@@ -87,6 +87,7 @@ def add_commands(commands):
     quality.add_argument("--review")
     quality.add_argument("--run")
     quality.add_argument("--config")
+    quality.add_argument("--alignment", help="按已经验证的实测时间线核对视频时长")
     quality.add_argument("--out", required=True)
     quality.set_defaults(handler=quality_command)
     audio_map = commands.add_parser("demo-audio-map", help="为 mock 静音 WAV 生成明确标记的测试映射")
@@ -243,7 +244,7 @@ def align_command(args):
 
 def quality_command(args):
     from .media import quality_report
-    result = quality_report(args.bundle, args.review, load_config(args.config), args.run)
+    result = quality_report(args.bundle, args.review, load_config(args.config), args.run, alignment=args.alignment)
     if Path(args.out).exists():
         raise ValueError("质量报告已存在，选择新版本")
     atomic_json(args.out, result)

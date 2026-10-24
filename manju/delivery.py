@@ -10,7 +10,7 @@ from fractions import Fraction
 
 from .assets import identity_report, lineage
 from .io import digest, digest_bytes, inside, read_json
-from .media import probe, quality_report
+from .media import alignment_subtitles, probe, quality_report, validate_alignment
 from .review import load_bundle
 from .safeio import atomic_json, redact
 
@@ -20,9 +20,7 @@ def handoff(bundle, output, alignment=None):
     manifest = load_bundle(bundle)
     if output.exists():
         raise ValueError("剪辑交接目录已存在")
-    aligned = read_json(Path(alignment) / "alignment.json") if alignment else None
-    if aligned and aligned["manifest_sha256"] != digest(bundle / "manifest.json"):
-        raise ValueError("对齐记录不属于本构建")
+    aligned = validate_alignment(bundle, alignment) if alignment else None
     timeline = aligned["timeline"] if aligned else [{"shot_id": shot["id"], "start_ms": shot["start_ms"], "duration_ms": shot["duration_ms"]} for shot in manifest["shots"]]
     output.mkdir(parents=True)
     with (output / "timeline.csv").open("w", encoding="utf-8", newline="") as stream:
@@ -32,6 +30,8 @@ def handoff(bundle, output, alignment=None):
             writer.writerow([shot["shot_id"], shot["start_ms"], shot["duration_ms"], shot["start_ms"] + shot["duration_ms"]])
     subtitle = Path(alignment) / "subtitles.measured.srt" if aligned else bundle / "subtitles.preview.srt"
     shutil.copyfile(subtitle, output / "subtitles.srt")
+    if aligned and (output / "subtitles.srt").read_bytes() != alignment_subtitles(bundle, aligned).encode("utf-8"):
+        raise ValueError("交接字幕在复制时发生变化")
     result = {"handoff_version": "1.0", "manifest_sha256": digest(bundle / "manifest.json"), "timeline": timeline, "timing_basis": "measured_audio" if aligned else "planned_preview", "notice": "通用 JSON/CSV/SRT 交接，不是特定剪辑软件工程文件；需在目标软件核对导入与重定时。"}
     atomic_json(output / "handoff.json", result)
     return result
@@ -75,7 +75,8 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
     if output.exists():
         raise ValueError("交付目录已存在，禁止覆盖旧交付版本")
     rights = identity_report(read_json(bundle / "episode.snapshot.json"), config, production=not demo)
-    quality = quality_report(bundle, review, config, run)
+    aligned = validate_alignment(bundle, alignment) if alignment else None
+    quality = quality_report(bundle, review, config, run, alignment=alignment)
     source_record = None
     business_record = None
     if not demo:
@@ -85,7 +86,6 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
             raise ValueError("授权记录门禁失败：" + "; ".join(rights["problems"]))
         if not quality["production_ready"]:
             raise ValueError("实际媒体的技术检查和人工复核未全部通过；mock 不可生产交付")
-        aligned = read_json(Path(alignment) / "alignment.json")
         if aligned.get("mock") or aligned.get("manifest_sha256") != digest(bundle / "manifest.json"):
             raise ValueError("对齐结果仍为 mock 或属于旧构建")
         measured = probe(final)
