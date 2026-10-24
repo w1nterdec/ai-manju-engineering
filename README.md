@@ -4,7 +4,7 @@
 
 [GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
 
-**当前版本：0.2.0 / M1。** 离线能力注册、全层 mock、镜头路由和适配器契约测试 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
+**当前版本：0.3.0 / M2。** 可恢复的持久任务执行、幂等产物、局部依赖失效和人工审核节点 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
 
 ## 从哪里开始
 
@@ -22,6 +22,8 @@
 python -m manju check examples/midnight_letter/episode.json
 python -m manju build examples/midnight_letter/episode.json --out build/demo-v1
 python -m manju check-series examples/midnight_letter/series/series.json
+python -m manju plan build/demo-v1 --out build/preview.json
+python -m manju run build/demo-v1 --out build/run --preview build/preview.json --auto-review-mock
 python -m unittest discover -s tests -v
 ```
 
