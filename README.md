@@ -2,6 +2,8 @@
 
 面向中文 AI 漫剧的制作规范、提示词库与可运行工具。目标是让人物名字读得对、角色与道具保持连续、画面忠于剧本，并让每次生成和返工可以追溯。
 
+[GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
+
 **当前版本：0.1 工程基础版。** 已提供本地检查、制作计划编译、共享剧集设定和绑定文件摘要的人工复核工具。尚未接入生成模型，未提供生成成片，未经过行业水平对比评测。未来能力见 [路线图](ROADMAP.md)。
 
 ## 从哪里开始
@@ -13,6 +15,8 @@
 ## 五分钟运行
 
 需要 Python 3.10+。核心工具只使用标准库，无需安装第三方依赖、GPU 或 API 密钥。请在仓库根目录执行；Windows 可按安装情况把 `python` 换成 `py`。
+
+可以在 GitHub 使用 **Code → Download ZIP** 后解压，也可以运行 `git clone https://github.com/w1nterdec/ai-manju-engineering.git`，然后进入下载的目录。
 
 ```bash
 python -m manju check examples/midnight_letter/episode.json
