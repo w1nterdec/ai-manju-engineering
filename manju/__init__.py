@@ -1,3 +1,3 @@
-"""Model-independent planning and review tools for Chinese AI motion comics."""
+"""Offline-first AI motion-comic production engineering."""
 
-__version__ = "0.1.0"
+__version__ = "0.8.2"

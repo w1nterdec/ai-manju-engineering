@@ -1,0 +1,10 @@
+{
+  "profile_version": "1.0", "id": "shoppable_export", "include_labor": false,
+  "deliverables": ["final", "subtitles", "shoppable_metadata"],
+  "required_checks": ["sku_url_timing_complete", "platform_metadata_review"],
+  "metrics": [{"id": "per_video", "denominator": "units", "multiplier": "1"}],
+  "templates": {
+    "shoppable.template.json": {"metadata_version": "1.0", "duration_ms": null, "items": [{"sku": null, "url": null, "start_ms": null, "end_ms": null}]},
+    "quote-inputs.json": {"currency": null, "production_cost": null, "units": null, "rework_buffer": null, "margin": null}
+  }
+}

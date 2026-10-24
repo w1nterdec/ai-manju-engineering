@@ -1,0 +1,23 @@
+{
+  "production_version": "1.0",
+  "business_profile": "series_drama",
+  "mock": true,
+  "routes": {
+    "defaults": {
+      "text": [{"provider": "mock", "model": "mock-text"}],
+      "image": [{"provider": "mock", "model": "mock-image"}],
+      "video": [{"provider": "mock", "model": "mock-video"}],
+      "identity": [{"provider": "mock", "model": "mock-identity"}],
+      "tts": [{"provider": "mock", "model": "mock-tts"}],
+      "asr": [{"provider": "mock", "model": "mock-asr"}],
+      "avatar": [{"provider": "mock", "model": "mock-avatar"}],
+      "edit": [{"provider": "mock", "model": "mock-edit"}]
+    },
+    "shots": {}
+  },
+  "identities": {},
+  "identity_policy": "warn",
+  "execution": {"concurrency": 2, "max_attempts": 2, "backoff_seconds": 0.01},
+  "pricing": {"as_of": "2026-10-24", "source_url": "https://example.invalid/mock-pricing", "example": true, "notice": "示例，非真实价格", "currency": "DEMO", "rates": {"default": {"unit": "item", "amount": "0.01"}}, "conversions": {}},
+  "budgets": {"project": "100", "episode": "100", "shot": "10", "batch": "100"}
+}

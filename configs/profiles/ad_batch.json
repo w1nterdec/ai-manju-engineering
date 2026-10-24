@@ -1,0 +1,10 @@
+{
+  "profile_version": "1.0", "id": "ad_batch", "include_labor": false,
+  "deliverables": ["final", "subtitles", "variant_lineage", "ab_comparison"],
+  "required_checks": ["variant_differences", "platform_dimensions_duration", "product_facts_match"],
+  "metrics": [{"id": "per_asset", "denominator": "units", "multiplier": "1"}, {"id": "per_sku", "denominator": "skus", "multiplier": "1"}, {"id": "per_variant", "denominator": "variants", "multiplier": "1"}],
+  "templates": {
+    "products.template.json": {"items": [{"sku": "DEMO-SKU", "product_name": "示例商品", "selling_point": "仅用于离线流程验证的输入卖点", "hooks": ["示例开头甲", "示例开头乙"], "product_asset_id": null}]},
+    "quote-inputs.json": {"currency": null, "production_cost": null, "units": null, "skus": null, "variants": null, "rework_buffer": null, "margin": null}
+  }
+}

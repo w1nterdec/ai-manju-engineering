@@ -9,6 +9,8 @@ from .io import digest
 from .project import load_episode, validate_series
 from .review import gate, review_template
 from .validation import validate
+from .production_cli import add_commands
+from .safeio import redact
 
 
 def report(findings, as_json, success):
@@ -45,10 +47,14 @@ def main(argv=None):
     review.add_argument("review")
     review.add_argument("--source", help="同时检查当前源剧本是否仍与本次构建相同")
     review.add_argument("--json", action="store_true")
+    review.add_argument("--production-config", help="额外检查实际素材和声音授权记录")
     hash_command = commands.add_parser("hash", help="计算产物 SHA-256，写入复核记录")
     hash_command.add_argument("file")
+    add_commands(commands)
     args = parser.parse_args(argv)
     try:
+        if hasattr(args, "handler"):
+            return args.handler(args)
         if args.command == "init":
             init_episode(args.destination)
             print(f"已创建：{args.destination}")
@@ -69,13 +75,13 @@ def main(argv=None):
             else:
                 print(json.dumps(data, ensure_ascii=False, indent=2))
         elif args.command == "gate":
-            return report(gate(args.bundle, args.review, args.source), args.json, "冻结构建的逐镜头人工复核记录；非自动媒体质量判定，非最终成片验收")
+            return report(gate(args.bundle, args.review, args.source, args.production_config), args.json, "冻结构建的逐镜头人工复核记录；非自动媒体质量判定，非最终成片验收")
         elif args.command == "hash":
             print(digest(args.file))
     except (OSError, ValueError) as exc:
         if getattr(args, "json", False):
-            print(json.dumps({"passed": False, "error": str(exc)}, ensure_ascii=False))
+            print(json.dumps({"passed": False, "error": redact(str(exc))}, ensure_ascii=False))
         else:
-            print(f"ERROR: {exc}", file=sys.stderr)
+            print(f"ERROR: {redact(str(exc))}", file=sys.stderr)
         return 2
     return 0

@@ -1,0 +1,5 @@
+{
+  "example": true, "currency": "DEMO", "production_cost": "8", "human_hours": "2", "hourly_cost": "3",
+  "rework_buffer": "0.1", "margin": "0.2", "accepted_seconds": "60", "units": "2", "episodes": "1", "skus": "2", "variants": "4",
+  "notice": "仅供公式验证的任意示例参数，非真实价格、收入或市场数据。"
+}

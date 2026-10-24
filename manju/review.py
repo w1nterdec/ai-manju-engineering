@@ -63,7 +63,7 @@ def review_template(directory):
     }
 
 
-def gate(directory, review_path, source=None):
+def gate(directory, review_path, source=None, production_config=None):
     directory = Path(directory)
     findings = []
 
@@ -153,4 +153,10 @@ def gate(directory, review_path, source=None):
             error(path, "每个镜头须绑定一个 video，有对白时还须绑定一个 audio")
     for shot_id in sorted(expected.keys() - seen):
         error("review.shots", f"缺少镜头复核：{shot_id}")
+    if production_config is not None:
+        from .adapters import load_config
+        from .assets import identity_report
+        rights = identity_report(read_json(directory / "episode.snapshot.json"), load_config(production_config), production=True)
+        for problem in rights["problems"]:
+            findings.append(Finding("error", "R001", "rights", problem))
     return findings
