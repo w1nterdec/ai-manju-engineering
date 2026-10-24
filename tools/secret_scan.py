@@ -37,8 +37,8 @@ def main():
         if any(Path(name).name == ".env" or (Path(name).name.startswith(".env.") and Path(name).name != ".env.example") for name in changed if name):
             errors.append("forbidden environment file in outgoing history")
     objects = subprocess.check_output(["git", "rev-list", "--objects", "origin/main..HEAD"])
-    object_ids = b"\n".join(line.split(b" ", 1)[0] for line in objects.splitlines()) + b"\n"
-    sizes = subprocess.run(["git", "cat-file", "--batch-check=%(objecttype) %(objectsize)"], input=object_ids, capture_output=True, check=True).stdout
+    object_ids = b"\n".join(line.split(b" ", 1)[0] for line in objects.splitlines())
+    sizes = subprocess.run(["git", "cat-file", "--batch-check=%(objecttype) %(objectsize)"], input=object_ids + b"\n", capture_output=True, check=True).stdout if object_ids else b""
     if any(line.endswith(b" missing") for line in sizes.splitlines()):
         errors.append("unable to inspect an outgoing Git object")
     if any(line.startswith(b"blob ") and int(line.split()[1]) > 5 * 1024 * 1024 for line in sizes.splitlines()):
