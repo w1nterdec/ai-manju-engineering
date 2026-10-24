@@ -52,11 +52,11 @@ tasks.json                生成、复核、剪辑的依赖计划；当前没有
 
 ```bash
 python -m manju review-template build/demo-v1 --out build/demo-v1/review.json
-python -m manju hash build/demo-v1/media/S001.mp4
-python -m manju gate build/demo-v1 build/demo-v1/review.json --source examples/midnight_letter/episode.json
+python -m manju hash build/demo-v1/episode.snapshot.json
+python -m manju gate build/demo-v1 build/demo-v1/review.json --source examples/midnight_letter/episode.json # expect: 1
 ```
 
-先实际生成并保存媒体，再填写复核人、带时区的时间、逐项结论以及实际文件 SHA-256。模板初始为 `pending`，此时 `gate` **应当失败**。详细操作见 [质量验收](docs/quality-gates.md)。
+上例 hash 演示对已有文件求摘要；实际复核时改成真实媒体路径。先实际生成并保存媒体，再填写复核人、带时区的时间、逐项结论以及实际文件 SHA-256。模板初始为 `pending`，此时 `gate` **应当失败**。详细操作见 [质量验收](docs/quality-gates.md)。
 
 `gate` 检查人工记录是否完整、媒体是否仍是被审核的文件；它不自动观看媒体，不验证审核人身份，也不代替最终剪辑、字幕、混音和内容权利验收。
 
