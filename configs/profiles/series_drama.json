@@ -1,0 +1,10 @@
+{
+  "profile_version": "1.0", "id": "series_drama", "include_labor": false,
+  "deliverables": ["final", "subtitles", "voice_plan", "continuity_report"],
+  "required_checks": ["cross_episode_identity", "prop_continuity"],
+  "metrics": [{"id": "per_finished_minute", "denominator": "accepted_seconds", "multiplier": "60"}, {"id": "per_episode", "denominator": "episodes", "multiplier": "1"}],
+  "templates": {
+    "quote-inputs.json": {"currency": null, "production_cost": null, "accepted_seconds": null, "episodes": null, "rework_buffer": null, "margin": null},
+    "continuity.template.json": {"status": "pending", "series_check": null, "human_review": null}
+  }
+}

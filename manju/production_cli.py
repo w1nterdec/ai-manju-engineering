@@ -106,6 +106,7 @@ def add_commands(commands):
     packaging.add_argument("--final")
     packaging.add_argument("--alignment")
     packaging.add_argument("--provenance")
+    packaging.add_argument("--business-checks")
     packaging.add_argument("--demo", action="store_true")
     packaging.add_argument("--include-costs", action="store_true")
     packaging.add_argument("--out", required=True)
@@ -113,10 +114,36 @@ def add_commands(commands):
     verification = commands.add_parser("verify-package", help="独立校验交付包文件摘要与完整性")
     verification.add_argument("directory")
     verification.set_defaults(handler=verify_package_command)
+    new = commands.add_parser("new", help="按可校验业务画像创建项目")
+    new.add_argument("--profile", required=True)
+    new.add_argument("--out", required=True)
+    new.set_defaults(handler=new_command)
+    batch_parser = commands.add_parser("batch", help="离线广告商品/钩子批次，单项失败隔离")
+    batch_parser.add_argument("project")
+    batch_parser.add_argument("input")
+    batch_parser.add_argument("--out", required=True)
+    batch_parser.add_argument("--execute", action="store_true")
+    batch_parser.add_argument("--auto-review-mock", action="store_true")
+    batch_parser.set_defaults(handler=batch_command)
+    quote = commands.add_parser("quote", help="按用户参数计算单位成本与报价辅助值")
+    quote.add_argument("--profile", required=True)
+    quote.add_argument("--inputs", required=True)
+    quote.add_argument("--out", required=True)
+    quote.set_defaults(handler=quote_command)
+    shoppable = commands.add_parser("shoppable-export", help="仅导出 SKU/URL/时间点，不连接店铺")
+    shoppable.add_argument("input")
+    shoppable.add_argument("--out", required=True)
+    shoppable.set_defaults(handler=shoppable_command)
+    revision = commands.add_parser("revision-add", help="追加客户修改轮次记录")
+    revision.add_argument("project")
+    revision.add_argument("--requester", required=True)
+    revision.add_argument("--description", required=True)
+    revision.set_defaults(handler=revision_command)
 
 
 def emit(value):
-    print(json.dumps(value, ensure_ascii=False, indent=2))
+    from .safeio import redact
+    print(json.dumps(redact(value), ensure_ascii=False, indent=2))
     return 0
 
 
@@ -251,7 +278,7 @@ def handoff_command(args):
 
 def package_command(args):
     from .delivery import package
-    result = package(args.bundle, args.out, load_config(args.config), run=args.run, demo=args.demo, review=args.review, final=args.final, alignment=args.alignment, provenance=args.provenance, include_costs=args.include_costs)
+    result = package(args.bundle, args.out, load_config(args.config), run=args.run, demo=args.demo, review=args.review, final=args.final, alignment=args.alignment, provenance=args.provenance, include_costs=args.include_costs, profile_checks=args.business_checks)
     return emit({"mode": result["mode"], "production_ready": result["production_ready"], "out": args.out})
 
 
@@ -260,3 +287,34 @@ def verify_package_command(args):
     result = verify_package(args.directory)
     emit(result)
     return int(not result["passed"])
+
+
+def new_command(args):
+    from .business import new_project
+    return emit(new_project(args.profile, args.out))
+
+
+def batch_command(args):
+    from .business import batch
+    result = batch(args.project, args.input, args.out, args.execute, args.auto_review_mock)
+    emit(result)
+    return int(any(job["status"] == "failed" for job in result["jobs"]))
+
+
+def quote_command(args):
+    from .business import load_profile, unit_cost
+    if Path(args.out).exists():
+        raise ValueError("报价输出已存在")
+    result = unit_cost(load_profile(args.profile), read_json(args.inputs))
+    atomic_json(args.out, result)
+    return emit(result)
+
+
+def shoppable_command(args):
+    from .business import export_shoppable
+    return emit(export_shoppable(args.input, args.out))
+
+
+def revision_command(args):
+    from .business import add_revision
+    return emit(add_revision(args.project, args.requester, args.description))

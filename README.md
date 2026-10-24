@@ -4,7 +4,7 @@
 
 [GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [自动检查](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml)
 
-**当前版本：0.7.0 / M6。** 通用剪辑交接、严格生产交付门禁、演示包与独立完整性验证 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
+**当前版本：0.8.0 / M7。** 四种业务画像、共享预算广告批次、参数化报价和商品时间点导出 尚未接入真实生成服务、未经过真实成片或行业评测。进度见 [STATE](docs/progress/STATE.md)。
 
 ## 从哪里开始
 
@@ -31,6 +31,13 @@ python -m manju quality-report build/demo-v1 --run build/run --out build/quality
 python -m manju handoff build/demo-v1 --alignment build/aligned --out build/handoff
 python -m manju package build/demo-v1 --run build/run --demo --alignment build/aligned --out build/delivery
 python -m manju verify-package build/delivery
+python -m manju new --profile series_drama --out build/series-project
+python -m manju new --profile ad_batch --out build/ad-project
+python -m manju new --profile client_service --out build/client-project
+python -m manju new --profile shoppable_export --out build/shoppable-project
+python -m manju batch build/ad-project examples/business/products.csv --out build/ad-batch --execute --auto-review-mock
+python -m manju quote --profile client_service --inputs examples/business/cost-inputs.json --out build/quote.json
+python -m manju shoppable-export examples/business/shoppable.json --out build/shoppable.json
 python -m unittest discover -s tests -v
 ```
 

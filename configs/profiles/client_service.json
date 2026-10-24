@@ -1,0 +1,11 @@
+{
+  "profile_version": "1.0", "id": "client_service", "include_labor": true,
+  "deliverables": ["final", "subtitles", "revision_log", "acceptance_form"],
+  "required_checks": ["client_authorization", "revision_rounds_recorded", "acceptance_trace"],
+  "metrics": [{"id": "per_delivery", "denominator": "units", "multiplier": "1"}],
+  "templates": {
+    "revision-log.json": {"revision_version": "1.0", "events": []},
+    "acceptance.template.json": {"status": "pending_customer_acceptance", "customer": null, "deliverable_sha256": null, "criteria": [], "decision": null, "reviewed_at": null},
+    "quote-inputs.json": {"currency": null, "production_cost": null, "human_hours": null, "hourly_cost": null, "rework_buffer": null, "margin": null, "units": null}
+  }
+}

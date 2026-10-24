@@ -67,7 +67,7 @@ def _provenance(bundle, review_path, provenance_path, final, rights):
     return record
 
 
-def package(bundle, output, config, *, run=None, demo=False, review=None, final=None, alignment=None, provenance=None, include_costs=False):
+def package(bundle, output, config, *, run=None, demo=False, review=None, final=None, alignment=None, provenance=None, include_costs=False, profile_checks=None):
     bundle, output = Path(bundle), Path(output)
     manifest = load_bundle(bundle)
     if output.exists():
@@ -75,6 +75,7 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
     rights = identity_report(read_json(bundle / "episode.snapshot.json"), config, production=not demo)
     quality = quality_report(bundle, review, config, run)
     source_record = None
+    business_record = None
     if not demo:
         if not all((review, final, alignment, provenance)):
             raise ValueError("生产打包缺少 --review、--final、--alignment 或 --provenance")
@@ -92,6 +93,14 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
         if not isinstance(label, dict) or not all(isinstance(label.get(key), str) and label[key].strip() for key in ("platform", "disclosure", "verified_by", "as_of", "source_url")):
             raise ValueError("缺少经使用者核实的 AI 内容标识元数据")
         source_record = _provenance(bundle, review, provenance, final, rights)
+        from .business import business_checks
+        business_record = business_checks(config, profile_checks, final)
+        built_in = {"final", "subtitles", "voice_plan", "quality", "rights", "provenance", "handoff"}
+        for name in business_record["profile"]["deliverables"]:
+            if name not in built_in:
+                path = config.get("delivery_files", {}).get(name)
+                if not path or not Path(path).is_file():
+                    raise ValueError(f"画像交付物缺失：{name}，需在 delivery_files 配置本地文件")
     elif run is None:
         raise ValueError("演示包须提供 mock --run")
     trace = None
@@ -117,6 +126,14 @@ def package(bundle, output, config, *, run=None, demo=False, review=None, final=
         atomic_json(stage / "ai-label.json", {"mode": "demo" if demo else "production", "label": config.get("ai_label"), "notice": "以所在地区及投放平台最新要求为准，由使用者核实；本记录不是法律结论。"})
         if source_record:
             atomic_json(stage / "provenance.json", source_record)
+        if business_record:
+            atomic_json(stage / "business-checks.json", business_record)
+            for name, path in config.get("delivery_files", {}).items():
+                if name not in business_record["profile"]["deliverables"]:
+                    continue
+                destination = inside(stage, f"business/{name}{Path(path).suffix.lower()}")
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(path, destination)
         if review:
             media_index = []
             for shot in read_json(review)["shots"]:
