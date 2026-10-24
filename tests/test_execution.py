@@ -77,6 +77,19 @@ class ExecutionTests(unittest.TestCase):
         rows = self.engine.run(self.plan)["tasks"]
         self.assertTrue(all(r["attempts"] == 0 for r in rows.values()))
 
+    def test_voice_asset_change_invalidates_speaker_audio_and_offscreen_review(self):
+        self.engine.run(self.plan, auto_review_mock=True)
+        self.config["identities"]["C001"] = {"asset_ids": ["a" * 64], "training_state": "not_required"}
+        changed = make_plan(self.bundle, self.config)
+        old_tasks = {task["id"]: task for task in self.plan["tasks"]}
+        new_tasks = {task["id"]: task for task in changed["tasks"]}
+        for task_id in ("tts:L001", "tts:L003", "review:S003", "edit:episode"):
+            self.assertNotEqual(old_tasks[task_id]["key"], new_tasks[task_id]["key"])
+        self.assertEqual(old_tasks["tts:L002"]["key"], new_tasks["tts:L002"]["key"])
+        self.assertIn("identity:C001", new_tasks["tts:L003"]["depends_on"])
+        self.engine.sync(changed)
+        self.assertEqual(self.engine.state()["tts:L003"]["state"], "stale")
+
     def test_tampered_success_is_rejected(self):
         row = self.engine.run(self.plan, auto_review_mock=True)["tasks"]["tts:L001"]
         path = self.engine.root / "artifacts" / json.loads(row["result"])["path"]

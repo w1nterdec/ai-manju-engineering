@@ -35,6 +35,7 @@ def make_plan(bundle, config=None):
         if task["kind"] == "tts":
             voice = voices[task["id"].split(":", 1)[1]]
             task["shot_id"] = voice["shot_id"]
+            task["depends_on"].append(f"identity:{voice['speaker_id']}")
             task["parameters"] = {"voice": voice, "duration_ms": voice["planned_end_ms"] - voice["planned_start_ms"]}
         elif task["kind"] in ("image", "video", "human_review"):
             shot_id = task["id"].split(":", 1)[1]
