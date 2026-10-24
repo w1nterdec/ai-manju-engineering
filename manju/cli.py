@@ -47,6 +47,7 @@ def main(argv=None):
     review.add_argument("review")
     review.add_argument("--source", help="同时检查当前源剧本是否仍与本次构建相同")
     review.add_argument("--json", action="store_true")
+    review.add_argument("--production-config", help="额外检查实际素材和声音授权记录")
     hash_command = commands.add_parser("hash", help="计算产物 SHA-256，写入复核记录")
     hash_command.add_argument("file")
     add_commands(commands)
@@ -74,7 +75,7 @@ def main(argv=None):
             else:
                 print(json.dumps(data, ensure_ascii=False, indent=2))
         elif args.command == "gate":
-            return report(gate(args.bundle, args.review, args.source), args.json, "冻结构建的逐镜头人工复核记录；非自动媒体质量判定，非最终成片验收")
+            return report(gate(args.bundle, args.review, args.source, args.production_config), args.json, "冻结构建的逐镜头人工复核记录；非自动媒体质量判定，非最终成片验收")
         elif args.command == "hash":
             print(digest(args.file))
     except (OSError, ValueError) as exc:

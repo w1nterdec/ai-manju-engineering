@@ -51,6 +51,29 @@ def add_commands(commands):
     cost.add_argument("directory")
     cost.add_argument("--config")
     cost.set_defaults(handler=cost_command)
+    asset = commands.add_parser("asset-add", help="导入本地素材与授权记录")
+    asset.add_argument("file")
+    asset.add_argument("--store", required=True)
+    asset.add_argument("--kind", required=True)
+    asset.add_argument("--metadata", required=True)
+    asset.add_argument("--evidence")
+    asset.set_defaults(handler=asset_add)
+    asset_approval = commands.add_parser("asset-approve", help="新增不可变的素材批准版本")
+    asset_approval.add_argument("asset_id")
+    asset_approval.add_argument("--store", required=True)
+    asset_approval.add_argument("--reviewer", required=True)
+    asset_approval.add_argument("--note", required=True)
+    asset_approval.set_defaults(handler=asset_approve)
+    asset_check = commands.add_parser("asset-check", help="检查授权记录，不作法律结论")
+    asset_check.add_argument("asset_id")
+    asset_check.add_argument("--store", required=True)
+    asset_check.add_argument("--as-of")
+    asset_check.set_defaults(handler=asset_check_command)
+    trace = commands.add_parser("lineage", help="回溯任务的剧本、参数、模型、资产与依赖")
+    trace.add_argument("bundle")
+    trace.add_argument("directory")
+    trace.add_argument("task_id")
+    trace.set_defaults(handler=lineage_command)
 
 
 def emit(value):
@@ -115,3 +138,25 @@ def cost_command(args):
         return emit(ledger.report())
     finally:
         ledger.close()
+
+
+def asset_add(args):
+    from .assets import AssetStore
+    return emit(AssetStore(args.store).add(args.file, args.kind, read_json(args.metadata), args.evidence))
+
+
+def asset_approve(args):
+    from .assets import AssetStore
+    return emit(AssetStore(args.store).approve(args.asset_id, args.reviewer, args.note))
+
+
+def asset_check_command(args):
+    from .assets import AssetStore
+    result = AssetStore(args.store).check(args.asset_id, as_of=args.as_of)
+    emit(result)
+    return int(not result["passed"])
+
+
+def lineage_command(args):
+    from .assets import lineage
+    return emit(lineage(args.bundle, args.directory, args.task_id))

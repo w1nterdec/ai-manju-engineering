@@ -6,6 +6,7 @@ from .io import digest, read_json
 from .review import load_bundle
 from .safeio import fingerprint
 from .costs import estimate
+from .assets import identity_report
 
 
 def make_plan(bundle, config=None):
@@ -16,10 +17,16 @@ def make_plan(bundle, config=None):
     shots = {shot["id"]: shot for shot in episode["shots"]}
     voices = {line["line_id"]: line for line in read_json(bundle / "voice_plan.json")}
     chars = {char["id"]: char for char in episode["characters"]}
+    identities = identity_report(episode, config)
+    if identities["problems"] and config.get("identity_policy", "warn") == "block":
+        raise ValueError("身份资产门禁：" + "; ".join(identities["problems"]))
     providers = registry()
     tasks = []
     for char_id, char in chars.items():
-        tasks.append({"id": f"identity:{char_id}", "kind": "identity", "depends_on": [], "parameters": {"character": char, "identity": config.get("identities", {}).get(char_id)}, "shot_id": None})
+        binding = config.get("identities", {}).get(char_id)
+        asset_ids = binding.get("asset_ids", []) if isinstance(binding, dict) else []
+        records = [record for record in identities["assets"] if record["asset_id"] in asset_ids]
+        tasks.append({"id": f"identity:{char_id}", "kind": "identity", "depends_on": [], "parameters": {"character": char, "identity": binding, "asset_records": records}, "shot_id": None})
     for original in read_json(bundle / "tasks.json"):
         task = {key: original[key] for key in ("id", "kind", "depends_on")}
         task["depends_on"] = list(task["depends_on"])
@@ -64,6 +71,7 @@ def make_plan(bundle, config=None):
         resolve(task["id"])
     result = {"plan_version": "1.0", "mock": all(providers.get(route["provider"]).capabilities.offline for task in tasks for route in task["route"]), "manifest_sha256": digest(bundle / "manifest.json"), "config_sha256": fingerprint(config), "tasks": tasks}
     result["project_id"] = manifest["project_id"]
+    result["identity_report"] = identities
     result["estimate"] = estimate(result, config)
     result["plan_id"] = fingerprint(result)
     return result
