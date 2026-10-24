@@ -1,10 +1,10 @@
 # 自治进度
 
-当前阶段：M0–M7 离线工程与收尾验证已完成；M8 已评估并暂缓实现。版本 0.8.1。
+当前阶段：M0–M7 离线工程与收尾验证已完成；M8 已评估并暂缓实现。当前版本 0.8.2；本轮合并前复查与 README 更新见下文。
 
 ## 已完成
 
-基线 15c5e58 → M0 64d51ec → M1 2d0912d → M2 c84c3eb → M3 bfe2a02 → M4 a2f85fb → M5 fceb139 → M6 4ff7892 → M7 5e65716。范围见 ROADMAP.md。main 未改动，所有工作在 codex/autopilot，草稿 PR 为 https://github.com/w1nterdec/ai-manju-engineering/pull/1。
+基线 15c5e58 → M0 64d51ec → M1 2d0912d → M2 c84c3eb → M3 bfe2a02 → M4 a2f85fb → M5 fceb139 → M6 4ff7892 → M7 5e65716。范围见 ROADMAP.md。上述里程碑开发期间未直接改动 main；后续授权合并进度以 PR 状态为准，PR 为 https://github.com/w1nterdec/ai-manju-engineering/pull/1。
 
 87 项本地 unittest 通过；README 23 条离线命令在隔离目录按预期退出。M0–M4 与 M6、M7 的跨系统 CI 已通过；M5 已包含在 M6 正常快进推送中并经后续测试覆盖。收尾功能快照 3154200 的 push 和 PR 两轮完整 CI 均通过；M5–M8 标签按决策 0010 统一绑定最终验证快照。
 
@@ -37,3 +37,13 @@ M5 首次推送因发布步骤重叠发生非快进拒绝；M6 随后正常快�
 最近一次已核验推送：codex/autopilot `5e657164aaa918b49ea945a54cd10d49c75dec75`，核验时间 2026-10-24T20:26:22+08:00。本次提交 SHA 以 git log 和里程碑标签为准，避免在提交内容中自引用自身摘要。
 
 最终发布以 codex/autopilot、milestone-M0–M8 与 PR #1 的实际引用和 CI 为准；本记录提交自身摘要由 Git 提供，不伪造自引用 SHA。决策索引新增 0010：收尾验证快照与标签。
+
+## 2026-10-24：用户授权检查后合并并更新 README
+
+最新明确授权覆盖 PR #1 先前“不得自行合并”的限制；仅允许本轮在复查和 CI 通过后通过 GitHub 合并，仍不直接推送 main、不强推、不改历史。
+
+复查发现并修复四项：TTS 身份依赖、实测延长镜头的时长检查、完整对齐/SRT 校验、合并后空历史范围扫描。新增回归测试；版本 0.8.2，旧 episode 和 CLI 兼容。README 按新手入口、完整模拟流程、画像和实际交付重新编排。
+
+合并采用 merge commit，以保留已发布里程碑和全部功能提交。验证命令为完整 unittest、tools/verify.py、tools/secret_scan.py 与 git diff --check；最终合并提交和实时检查结果以 PR #1、origin/main 为准，不在提交内伪造自身摘要。
+
+本轮合并前本地验证结果：96 项 unittest 全部通过；23 条 README 命令均按预期退出；扫描和空白检查通过。合并前必须等待本轮新提交的全部远端 CI 完成，合并后核对 main 的检查。

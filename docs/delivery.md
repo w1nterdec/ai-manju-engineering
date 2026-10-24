@@ -11,3 +11,5 @@ provenance_version 为 1.0，含 manifest_sha256、shots、final。shots 按镜�
 AI 标识配置 ai_label 需记录 platform、disclosure、verified_by、as_of、source_url。字段和实际显隐标识需由使用者按所在地区和投放平台最新要求核实；本工具不向任何平台发布，也不自动添加隐形水印。
 
 `verify-package 目录` 只需本包与标准库即可验证文件完整性。目录不能覆盖。没有真实客户样本和实际视频探测通过记录时，不应将本项目称为已完成商业成片验证。
+
+0.8.2 起，交接与生产包会校验完整对齐契约：原顺序覆盖全部镜头/台词、连续镜头边界、测量长度和音频摘要、总时长及规范 SRT。工具新生成报告还记录字幕 SHA-256；旧报告可无该字段，但其完整内容仍必须通过核对。延长的镜头按验证后的时间线检查，quality-report 可用 --alignment 指定。
