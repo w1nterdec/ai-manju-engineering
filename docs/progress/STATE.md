@@ -59,3 +59,5 @@ M5 首次推送因发布步骤重叠发生非快进拒绝；M6 随后正常快�
 本轮在 codex/autopilot 上整理审查文档，保持 main 原样；新草稿 PR 不适用上一轮仅针对 PR #1 的合并授权。新增决策 0011，候选版本仍是计划。
 
 验证：python -m unittest discover -s tests -q（96 passed）；python tools/verify.py（23 命令按预期退出）；python tools/secret_scan.py（passed）；审查复现四项 reproduced=true。ffprobe/ffmpeg 的 PATH 查询未找到工具，不作为测试失败或已完成实媒验证。
+
+本轮最近已核验推送：codex/autopilot `852b29cb34f0603852030ebc37a700ced4c3c644`，2026-10-25T00:32:34+08:00，远端与本地一致。审查草稿 PR：https://github.com/w1nterdec/ai-manju-engineering/pull/2 。后续仅追加本状态记录，不在提交内容中自引用自身摘要；最终引用以 Git 和 PR 为准。
