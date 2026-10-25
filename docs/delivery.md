@@ -1,5 +1,7 @@
 # 剪辑交接与交付包
 
+> 本页属于可选工程参考。个人实际制作先读[创作指南](creator-guide/README.md)；原有 mock 或接口契约不表示真实平台已接通。
+
 `handoff` 输出时间线 CSV/JSON 与 SRT。无 alignment 时是计划草稿，有 alignment 时按实测音频；视频需要重新剪辑的提示不能忽略。格式为通用清单，尚未验证 Premiere、DaVinci、CapCut 工程交换格式。
 
 `package --demo --run ...` 输出可独立校验的模拟包，包含源快照、镜头提示词、任务血缘、模拟媒体、质量和授权记录、AI 元数据、修改事件与静态客户报告。mock 不是真实配音或视频，包内醒目标记不可作为客户成片。成本默认隐藏，只有 --include-costs 才导出。

@@ -1,131 +1,79 @@
-# AI 漫剧提示词工程 · Manju Engineering
+# 个人 AI 短剧与漫剧创作指南
 
-面向中文 AI 漫剧的制作规范、提示词库与离线工程工具：管理姓名读音、角色与道具连续性、分镜和剧本关联，以及生成任务、预算、授权和交付记录。
+面向中国大陆个人创作者：复用现有工具，组织自己的生成线路，并在实际制作时查步骤、复制提示词、记录尝试和定位返工。
 
-[GitHub 仓库](https://github.com/w1nterdec/ai-manju-engineering) · [CI](https://github.com/w1nterdec/ai-manju-engineering/actions/workflows/ci.yml) · [入门指南](docs/start-here.md) · [路线图](ROADMAP.md)
+围绕三个问题展开：**姓名读错、画面瑕疵与角色不一致、剧情和分镜不匹配。**
 
-**当前版本：0.8.2。** M0–M7 的离线工程功能已实现；M8 只读看板经评估暂缓。内置适配器均为 mock，尚未接入真实生成服务，也没有真实成片、客户交付或行业对比评测结果。
+本项目以实操指南为主，附可选的本地辅助脚本。实际图片、视频、配音和剪辑在你选择的现有平台完成；不要求先搭建自己的创作平台，也不要求会写代码。
 
-## 适合怎样使用
+[开始第一条样片](docs/creator-guide/01-first-film.md) · [三条生成线路](docs/creator-guide/02-workflow.md) · [工具网站目录](docs/creator-guide/06-tools.md) · [复用与 fork](docs/creator-guide/07-reuse-and-fork.md) · [提示词库](prompts/README.md)
 
-- **新手学习**：从 [入门指南](docs/start-here.md) 和 [提示词流程](prompts/README.md) 开始，先制作并审核一个镜头。
-- **制作人员**：用结构化剧本统一人物、读音和分镜，导出制作说明；在自行选择的实际工具中制作，保留来源、审核与授权记录。
-- **工程开发**：阅读 [架构](docs/architecture.md)、[数据契约](docs/data-contract.md)、[适配规范](docs/providers.md) 和 [评测方案](docs/evaluation.md)。
+## 先选一条适合自己的生成线路
 
-核心运行只需 **Python 3.10+ 标准库**，无需 GPU、第三方 Python 包或 API 密钥。真实视频探测可选安装 ffprobe；完整发布扫描需要 Git。Windows 可按安装情况把 `python` 换成 `py`。
+- **图片动态漫 motion_comic**：豆包或 DeepSeek 整理剧本 → 即梦生成角色与镜头图 → 试听配音 → 剪映推拉、局部动态、字幕和终剪。无需每镜头都生成视频。
+- **逐镜视频短剧 story_video**：剧本与参考资产 → 批准关键图 → 选一个主视频工具逐镜生成 → 筛选与局部返工 → 配音及剪映后期。
+- **一站式创作 agent_first**：小云雀导入剧本 → 确认全局角色与场景 → 故事板和片段生成 → 重拍问题片段 → 导出后审片与终剪。
 
-下载 GitHub 的 **Code → Download ZIP** 并解压，或使用 `git clone https://github.com/w1nterdec/ai-manju-engineering.git`。以下命令均在仓库根目录执行。
+第一次先做 30—60 秒、5—8 个镜头的小样。原创[《雨夜来信》](examples/creator/README.md)提供了六镜头、46 秒的可编辑文字样例，尚无实际生成媒体。
 
-## 最小开始：检查与编译
+## 不写代码时怎么使用
 
-```bash
-python -m manju check examples/midnight_letter/episode.json
-python -m manju build examples/midnight_letter/episode.json --out build/demo-v1
-python -m manju check-series examples/midnight_letter/series/series.json
-```
+1. 按[第一条样片](docs/creator-guide/01-first-film.md)准备剧本、角色、场景和姓名读音。
+2. 从[提示词库](prompts/README.md)复制任务对应的模板，填入原文与参考要求。
+3. 到工具官网实际生成，先审核关键图，再处理需要动态的镜头。
+4. 保存选用和废弃版本，遇到问题查[最小返工](docs/creator-guide/03-quality-and-repair.md)。
+5. 在剪映组织声音、字幕和画面；[完整审片与发布准备](docs/creator-guide/05-publishing.md)。
 
-示例未提供角色参考图，因此出现相应警告是正常的。`check` 的 PASS 只表示静态检查通过，不能证明名字读音、画面或成片质量。
+## 可以直接使用的工具网站
 
-`build/demo-v1/` 包含以下制作计划：
+- 剧本讨论：[豆包](https://www.doubao.com/)、[DeepSeek](https://www.deepseek.com/)。
+- 图片与视频：[即梦](https://jimeng.jianying.com/)、[可灵中文站](https://klingai.kuaishou.com/)、[Vidu 中国站](https://www.vidu.cn/)、[海螺国内入口](https://hailuoai.com/video/create)。
+- 一站式短剧与漫剧：[小云雀](https://xyq.jianying.com/)。
+- 配音与终剪：[讯飞智作](https://peiyin.xunfei.cn/)、[剪映](https://www.jianying.com/)。
+- 进阶工作流：[LiblibAI](https://www.liblib.art/)、[ComfyUI](https://github.com/Comfy-Org/ComfyUI)。
 
-```text
-manifest.json             版本、输入摘要与文件索引
-episode.snapshot.json     冻结的设定和剧本
-shots/S001.md ...         逐镜头制作说明、状态与剧情事实
-voice_plan.json           原文字幕、配音文本与读音提示
-subtitles.preview.srt     基于计划时间的字幕草稿
-tasks.json                兼容旧格式的依赖计划，供执行器展开
-```
+[完整工具卡](docs/creator-guide/06-tools.md)记录适用环节、官方帮助、使用边界和核对日期；机器可读目录在 [catalog/tools.json](catalog/tools.json)。不把网页会员当 API 额度，不按导航站或课程宣传推断价格与效果。
 
-构建、预览、对齐和交付输出不覆盖已有版本。再次运行时使用新目录，如 `build/demo-v2`。
+## 复用或 fork 现有平台
 
-## 完整离线演示：执行到交付
+[Toonflow](https://github.com/HBAI-Ltd/Toonflow-app)是本轮优先评估的创作工作台候选；[ComfyUI](https://github.com/Comfy-Org/ComfyUI)可作为进阶生成执行层。具体固定版本、许可证、外部模型依赖和自部署要求，见[复用与 fork 指南](docs/creator-guide/07-reuse-and-fork.md)及[catalog/reuse.json](catalog/reuse.json)。
 
-先完成上面的编译，再执行：
+复用产品有三种不同动作：使用其网站、调用其官方接口、按许可证 fork 源码。仓库目前只提供引用与交接，不声称已部署、已 fork 或接通这些服务。
 
-```bash
-python -m manju plan build/demo-v1 --out build/preview.json --estimate
-python -m manju run build/demo-v1 --out build/run --preview build/preview.json --auto-review-mock
-python -m manju cost-report build/run
-python -m manju demo-audio-map build/run --out build/audio-map.json
-python -m manju align build/demo-v1 build/audio-map.json --out build/aligned
-python -m manju quality-report build/demo-v1 --run build/run --alignment build/aligned --out build/quality.json
-python -m manju handoff build/demo-v1 --alignment build/aligned --out build/handoff
-python -m manju package build/demo-v1 --run build/run --demo --alignment build/aligned --out build/delivery
-python -m manju verify-package build/delivery
-```
+## 可选的本地自动化
 
-图像、视频等 mock 产物是带元数据的占位说明，mock 配音是用于时长测量的静音 WAV。`--auto-review-mock` 只模拟审核，未加该开关时执行器会在人工节点暂停。`DEMO` 成本为配置中的模拟数值，**不是厂商价格或真实账单**。
-
-可查看 `build/delivery/report.html` 和 `package-manifest.json`。独立校验只检查文件完整性；演示包不能作为客户成片或实际验收结果。`--allow-network` 不会启用真实适配器，本发行版仍拒绝真实生成调用。
-
-## 四种业务画像
-
-画像是 [可校验配置](configs/profiles)，决定表单、成本口径、交付物与特有检查：
-
-- `series_drama`：连续剧集、跨集人物与道具、每分钟/每集成本。
-- `ad_batch`：商品清单、多个开头钩子、变体血缘、共享批次预算。
-- `client_service`：人工与返工参数、修改轮次、报价辅助、客户验收模板。
-- `shoppable_export`：SKU、HTTPS 链接和时间点元数据，仅导出文件。
+需要批量整理制作资料时，在仓库根目录使用 Python 3.10+；这组命令只使用标准库，不联网、不扣生成费用。
 
 ```bash
-python -m manju new --profile series_drama --out build/series-project
-python -m manju new --profile ad_batch --out build/ad-project
-python -m manju new --profile client_service --out build/client-project
-python -m manju new --profile shoppable_export --out build/shoppable-project
-python -m manju batch build/ad-project examples/business/products.csv --out build/ad-batch --execute --auto-review-mock
-python -m manju quote --profile client_service --inputs examples/business/cost-inputs.json --out build/quote.json
-python -m manju shoppable-export examples/business/shoppable.json --out build/shoppable.json
+python -m manju creator routes
+python -m manju creator tools --stage video
+python -m manju creator new --route motion_comic --out build/first-film
+python -m manju creator check build/first-film
+python -m manju creator pack build/first-film --out build/first-film-pack-v1
+python -m manju creator verify-pack build/first-film-pack-v1
 ```
 
-报价完全按输入参数计算，示例不是市场价格、收入预测或盈利保证。商品示例不连接店铺；项目不实现转售、订阅计费、多租户 SaaS、直播或平台自动发布。见 [成本口径](docs/commercial/profiles-and-costs.md) 与 [作业和风险](docs/commercial/operations-and-risks.md)。
+编辑输入文件后重新导出到新版本目录。打开制作包中的 `index.html` 或 `README.md`，可查看工具入口、逐镜卡、图片和视频提示词、配音清单、计划字幕、审核表和尝试记录。
 
-## 你关心的三个质量问题
+脚本会检查台词原文、说话人、唯一分配和顺序、角色与场景引用、完整姓名读音登记；不会自动判断画面是否好看、姓名实际读对或剧情已经被观众理解。字幕按计划时长生成，需在配音与终剪后对齐。审核表默认全部待办。
 
-**名字读错**：保存完整姓名、术语和作者确认的目标读音，按实际 TTS 能力转换控制语法，固定音色并逐句试听。更换身份/音色资产会使对应配音与下游审核失效。字幕保留正确汉字，不能把纠音替换文字直接写进字幕。见 [读音方案](docs/pronunciation.md)。
+更多操作见[本地自动化与数据约定](docs/creator-guide/08-automation.md)。冻结制作包供追溯，填写尝试与审核时使用工作副本，再保存实际素材和版本。
 
-**画面瑕疵**：先批准角色参考图与关键帧，再生成短镜头；减少复杂互动，关键文字与钟面可用后期合成。参考图、负面描述或固定 seed 都不能保证每次生成正确，仍需观看完整视频。见 [故障处理](docs/failure-cookbook.md)。
+## 项目结构与当前边界
 
-**剧情不匹配**：原剧本是台词唯一来源，分镜通过 ID 引用；检查剧情覆盖、台词顺序、画面内说话人和状态链，再核对成片是否真正传达事实。结构覆盖不等于叙事质量。
+- [docs/creator-guide/](docs/creator-guide/README.md)：个人实操指南，是主入口。
+- [prompts/](prompts/README.md)：按任务复制的提示词。
+- [examples/creator/](examples/creator/README.md)：可编辑原创短片。
+- [catalog/](catalog/README.md)：国内工具、生成线路和开源复用目录。
+- `manju/creator.py` 与 `creator_cli.py`：可选制作包辅助。
+- [旧工程工具](docs/engineering/README.md)：原 CLI、mock 执行、预算、血缘与交付契约，保留兼容并标为进阶选项。
 
-## 实际媒体的审核与交付
+当前版本 **0.9.0** 表示本次“个人指南与制作包”重构，不等同于旧路线中候选 0.9 的实媒平台能力已完成。当前没有真实厂商适配器、自动登录、无人值守出片、平台自动发布或已验证商业样片。
 
-以下命令创建待审核记录并演示求摘要；尚未填写和提供实际媒体时，最后一条应当退出 1：
+## 后续怎样改进
 
-```bash
-python -m manju review-template build/demo-v1 --out build/demo-v1/review.json
-python -m manju hash build/demo-v1/episode.snapshot.json
-python -m manju gate build/demo-v1 build/demo-v1/review.json --source examples/midnight_letter/episode.json # expect: 1
-```
+先依据一次实际制作补充失败样本和最少返工，再决定是否需要一个官方 API 或可复用开源工作流。保持指南能脱离代码独立使用，不再将建设全链路工业平台作为前置任务。[当前路线](ROADMAP.md) · [方向变更说明](docs/decisions/0012-personal-creator-guide.md)
 
-实际使用时，hash 改为真实媒体路径，填写实际审核人、带时区时间和具体证据。`gate --production-config` 额外检查素材/声音授权记录；生产打包还要求最终视频、完整实测时间线、来源、AI 标识和画像检查。mock、缺失记录或未完成的技术检查会阻断生产包，详见 [质量验收](docs/quality-gates.md) 和 [交付规范](docs/delivery.md)。
+开发检查：Python unittest、[指南链接与目录检查](tools/check_guide.py)、[隔离示例验证](tools/verify.py)。原有历史审查与工业平台计划保留为背景，不是当前执行路线。
 
-实测配音导致镜头延长时，按新时间线重新剪辑视频，并给 `quality-report` 传入 `--alignment`。交接与打包会核对全部镜头、台词、测量和字幕，拒绝空时间线或被改写的 SRT；旧版工具生成的完整对齐记录仍可使用。
-
-授权、AI 标识和审核均为记录检查机制，不提供法律结论、审核人身份认证或数字签名。具体要求以所在地区及投放平台最新规则为准，由使用者核实；最终成片仍须客户验收。
-
-## 当前边界与后续工作
-
-已实现离线执行恢复、幂等与局部重建、四级预算、素材批准与授权记录、血缘、逐句实测字幕、通用剪辑交接、交付包校验及四种画像。核心保持零第三方依赖，episode 0.1 和原有命令保持兼容。
-
-尚未验证真实厂商服务与账单、真实成片效果、客户交付、大规模负载或多机协作；未实现字级/口型对齐、批次整体恢复、可信签名和只读看板。ASR 目前是能力接口与已提供转写的文本筛查函数，不能证明多音字读对。
-
-下一阶段先修复审查发现的边界并验证本地实媒，再依据所选服务的官方文档接入真实适配器，用原创短片验证整条链路。凭据由使用者在自己的授权环境保管，不提交仓库。见 [路线图](ROADMAP.md)、[人工待办](docs/HUMAN_TODO.md) 和 [进度记录](docs/progress/STATE.md)。
-
-## 项目审查与成长路线
-
-[2026-10-25 审查](docs/audits/2026-10-25-project-review.md) 在既有测试之外复现四项 P2，目前尚未修复：素材拷贝中断、画像保留名、额外素材失效链和演示包血缘核对。审查不等于新增能力，96 测试通过也不表示没有漏测边界。
-
-[候选成长路线](docs/growth/2026-10-25-roadmap.md) 先修复这些边界，再验证本地实媒、单个中文纠音 TTS、受控视觉链和小团队交付。版本为候选计划，真实模型效果、价格和客户结果仍需实际证据。
-
-## 开发、贡献与许可
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-CI 覆盖 Windows/Linux 与 Python 3.10、3.12、3.14，并在隔离目录执行全部 README 示例。发布前另运行 `python tools/secret_scan.py` 和 `git diff --check`；扫描工具不是零遗漏证明。
-
-[贡献指南](CONTRIBUTING.md) · [更新记录](CHANGELOG.md) · [官方参考资料](docs/references.md) · [MIT 许可证](LICENSE)
-
-代码、文档、提示词与原创示例按 MIT 开放。外部模型、音色和素材按各自条款使用；模型接入不自动授予声音或角色素材的使用权。
+代码、文档、提示词和原创示例按 [MIT](LICENSE) 发布；引用平台、模型、音色、素材及第三方源码分别遵守各自条款。

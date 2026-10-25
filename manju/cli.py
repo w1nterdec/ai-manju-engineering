@@ -11,6 +11,7 @@ from .review import gate, review_template
 from .validation import validate
 from .production_cli import add_commands
 from .safeio import redact
+from .creator_cli import add_creator_commands
 
 
 def report(findings, as_json, success):
@@ -25,9 +26,10 @@ def report(findings, as_json, success):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog="python -m manju", description="AI 漫剧剧本检查、制作计划编译与人工复核留痕；不调用生成模型。")
+    parser = argparse.ArgumentParser(prog="python -m manju", description="个人 AI 短剧与漫剧指南的本地辅助：先用 creator 选线路和导出制作包；旧工程命令可选。不调用生成平台。")
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
+    add_creator_commands(commands)
     init = commands.add_parser("init", help="复制可编辑的原创示例，不覆盖已有文件")
     init.add_argument("destination")
     check = commands.add_parser("check", help="检查结构、台词、读音登记与状态连续性")

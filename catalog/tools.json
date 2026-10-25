@@ -1,0 +1,369 @@
+{
+  "catalog_version": "1.0",
+  "as_of": "2026-10-25",
+  "region": "中国大陆个人创作者；开源本地工具另列部署条件",
+  "notice": "官方入口和文档核对，不代表账户内试用、效果评测或已经接入。integration_status 表示建议交接方式，不表示适配器已实现。",
+  "tools": [
+    {
+      "id": "doubao",
+      "name": "豆包",
+      "url": "https://www.doubao.com/",
+      "stages": [
+        "script",
+        "reference"
+      ],
+      "access": "个人网页或 App，具体功能与账户权限以产品内显示为准",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "讨论故事、角色与台词，生成待审阅的文本草稿"
+      ],
+      "limitations": [
+        "不是本项目已接通的编剧接口；草稿须人工核对原剧本事实与台词"
+      ],
+      "pricing_note": "本目录不固定免费额度或会员价格，购买前核对账户页",
+      "sources": [
+        {
+          "url": "https://www.doubao.com/",
+          "title": "豆包官方入口",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "url": "https://www.deepseek.com/",
+      "stages": [
+        "script"
+      ],
+      "access": "官方网页或 App；官网将对话入口和 API 开放平台分开",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "对话式整理故事、分集大纲和分镜草稿"
+      ],
+      "limitations": [
+        "网页对话与 API 是不同使用方式；本项目不自动调用服务"
+      ],
+      "pricing_note": "API 与对话端的计费和权限分别核对",
+      "sources": [
+        {
+          "url": "https://www.deepseek.com/",
+          "title": "DeepSeek 官网及对话和 API 入口",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "jimeng",
+      "name": "即梦 AI",
+      "url": "https://jimeng.jianying.com/",
+      "stages": [
+        "reference",
+        "image",
+        "video"
+      ],
+      "access": "个人网页或 App；以实际账户开放的模型和功能为准",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "准备角色与场景参考、图片和逐镜视频素材"
+      ],
+      "limitations": [
+        "逐镜检查外观、视线和运镜；不把完整剧集一次生成当作保证",
+        "本项目只输出制作说明和提示词，不自动登录或提交"
+      ],
+      "pricing_note": "模型、规格和生成次数影响消耗；以账户购买页为准",
+      "sources": [
+        {
+          "url": "https://jimeng.jianying.com/tools/ai-short-drama",
+          "title": "即梦 AI 短剧官方指南",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "kling",
+      "name": "可灵 AI",
+      "url": "https://klingai.kuaishou.com/",
+      "stages": [
+        "image",
+        "video"
+      ],
+      "access": "快手官方中文网页及可灵 App；功能依账户和模型而定",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "图生视频及多参考路线，可组合角色、服装、物品与场景参考"
+      ],
+      "limitations": [
+        "能力依据官方多图参考公告，不能当作当前套餐或所有模型参数",
+        "参考条件不能保证每个镜头一致；C 端会员不等于 API 权限"
+      ],
+      "pricing_note": "官方区分 C 端会员和企业 API，现行费用分别核对",
+      "sources": [
+        {
+          "url": "https://ir.kuaishou.com/zh-hans/news-releases/news-release-details/kuaishoukelingaituichuduotucankaogongneng/",
+          "title": "快手官方多图参考公告及中文入口",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "vidu",
+      "name": "Vidu 中国站",
+      "url": "https://www.vidu.cn/",
+      "stages": [
+        "reference",
+        "image",
+        "video"
+      ],
+      "access": "中国站网页或 App；官网区分个人版与企业版",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "参考生图、参考生视频、图生视频及 Agent 创作入口"
+      ],
+      "limitations": [
+        "所需参考方式、时长、分辨率和音频能力须逐模型核对",
+        "中国站个人创作与 API 平台为不同接入流程"
+      ],
+      "pricing_note": "个人订阅与 API 积分分别核对，本目录不复制活动价",
+      "sources": [
+        {
+          "url": "https://www.vidu.cn/",
+          "title": "Vidu 中国官网",
+          "verified_on": "2026-10-25"
+        },
+        {
+          "url": "https://platform.vidu.cn/docs/overview/faq",
+          "title": "Vidu API 常见问题",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "hailuo",
+      "name": "海螺 AI 国内入口",
+      "url": "https://hailuoai.com/video/create",
+      "stages": [
+        "video"
+      ],
+      "access": "使用 MiniMax 官方给出的国内创作入口；账户功能以当前页面为准",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "视频素材创作及主体参考能力路线"
+      ],
+      "limitations": [
+        "国内入口与 hailuoai.video 海外入口不同",
+        "所引主体参考发布说明为 2025 年材料，仅作入口和能力路线依据，不代表当前效果保证"
+      ],
+      "pricing_note": "现行消耗、排队及会员权益以国内账户页为准",
+      "sources": [
+        {
+          "url": "https://minimax.cn/news/s2v-01%E5%8F%91%E5%B8%83",
+          "title": "MiniMax 主体参考官方说明及国内外入口",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "xiaoyunque",
+      "name": "小云雀",
+      "url": "https://xyq.jianying.com/",
+      "stages": [
+        "script",
+        "reference",
+        "image",
+        "video",
+        "edit"
+      ],
+      "access": "个人 Web 创作入口；账户开放范围和所选模型需实际确认",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "上传剧本、确认需求、全局角色与场景、故事板编辑、合成导出"
+      ],
+      "limitations": [
+        "仍需确认资产、检查角色和片段重拍；一站式不等于无需人审",
+        "本项目没有接入其内部 Agent 或自动提交生产"
+      ],
+      "pricing_note": "官网有会员及积分体系，当前额度和价格以购买页为准",
+      "sources": [
+        {
+          "url": "https://xyq.jianying.com/tutorials/web-manual",
+          "title": "小云雀 Web 官方产品手册",
+          "verified_on": "2026-10-25"
+        },
+        {
+          "url": "https://xyq.jianying.com/",
+          "title": "小云雀官方入口",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "xunfei",
+      "name": "讯飞智作及讯飞配音",
+      "url": "https://peiyin.xunfei.cn/",
+      "stages": [
+        "audio"
+      ],
+      "access": "个人手机号或微信登录的网页制作；音色权限需核对",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "逐句试听、停顿、多音字与数字读法控制、音频导出"
+      ],
+      "limitations": [
+        "导出的具体声音与商业使用范围需看对应条款",
+        "纠音文本与正式字幕分开；文字转写正确不能代替试听"
+      ],
+      "pricing_note": "先试听再购买，音色、修改重做和导出费用以账户页为准",
+      "sources": [
+        {
+          "url": "https://peiyin.xunfei.cn/about",
+          "title": "讯飞官方使用帮助",
+          "verified_on": "2026-10-25"
+        },
+        {
+          "url": "https://peiyin.xunfei.cn/youshengStatic/protocol/zhiZuoUserAgreement.html",
+          "title": "讯飞智作服务协议",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "jianying",
+      "name": "剪映",
+      "url": "https://www.jianying.com/",
+      "stages": [
+        "audio",
+        "edit",
+        "review"
+      ],
+      "access": "国内移动端及桌面专业版；安装和账户权益按官方说明",
+      "usage_mode": "local_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "镜头剪辑、关键帧、蒙版、文本朗读、音频处理及成片导出"
+      ],
+      "limitations": [
+        "本项目不控制剪映、不承诺原生草稿 API",
+        "会员不等于所有音乐、字体、声音和模板均可全平台商用"
+      ],
+      "pricing_note": "软件功能权益与素材许可分别核对，保留购买和授权记录",
+      "sources": [
+        {
+          "url": "https://www.jianying.com/",
+          "title": "剪映官网",
+          "verified_on": "2026-10-25"
+        },
+        {
+          "url": "https://sf1-cdn-tos.douyinstatic.com/obj/ies-hotsoon-draft/vco/f72e9cd9-cc19-4db7-ba74-0794833ce854.html",
+          "title": "剪映素材使用许可协议",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "liblib",
+      "name": "LiblibAI",
+      "url": "https://www.liblib.art/",
+      "stages": [
+        "reference",
+        "image",
+        "video"
+      ],
+      "access": "国内创作网站；所选模型、工作流与账户权限分别核对",
+      "usage_mode": "web_app",
+      "integration_status": "manual_export",
+      "capabilities": [
+        "提供 WebUI、ComfyUI 与模型工作流的创作入口"
+      ],
+      "limitations": [
+        "公开页面部分依赖脚本，本轮未实际执行工作流",
+        "平台可用不等于每个社区模型、节点和素材均可商用"
+      ],
+      "pricing_note": "会员、算力及具体工作流消耗须在账户内核对",
+      "sources": [
+        {
+          "url": "https://www.liblib.art/workflows",
+          "title": "LiblibAI 官方工作流入口",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI",
+      "url": "https://github.com/Comfy-Org/ComfyUI",
+      "stages": [
+        "reference",
+        "image",
+        "video",
+        "audio"
+      ],
+      "access": "自行部署或选择托管服务；按工作流准备兼容模型和计算资源",
+      "usage_mode": "self_hosted",
+      "integration_status": "local_workflow",
+      "capabilities": [
+        "可复用节点图、队列和本地 API，适合固定图像与视频处理流程"
+      ],
+      "limitations": [
+        "这是本地工作流候选，不是本项目已部署的服务",
+        "软件 GPL 许可证、模型权重、第三方节点及在线模型条款分别核对"
+      ],
+      "pricing_note": "软件许可不等于免费 GPU 或免费模型 API",
+      "sources": [
+        {
+          "url": "https://github.com/Comfy-Org/ComfyUI/blob/19ae172bff6c9e4c738e7f2e00fe087f5b5b46ab/README.md",
+          "title": "ComfyUI 固定版本 README",
+          "verified_on": "2026-10-25"
+        },
+        {
+          "url": "https://github.com/Comfy-Org/ComfyUI/blob/19ae172bff6c9e4c738e7f2e00fe087f5b5b46ab/LICENSE",
+          "title": "ComfyUI 固定版本 LICENSE",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": "toonflow",
+      "name": "Toonflow",
+      "url": "https://github.com/HBAI-Ltd/Toonflow-app",
+      "stages": [
+        "manage",
+        "reference",
+        "image",
+        "video",
+        "edit"
+      ],
+      "access": "自行部署或使用其客户端，并自行配置模型和 API 账户；本项目未安装",
+      "usage_mode": "self_hosted",
+      "integration_status": "local_workflow",
+      "capabilities": [
+        "以画布组织剧本、角色场景、图片视频和素材预览下载，可评估复用或 fork"
+      ],
+      "limitations": [
+        "当前核对版本为 MIT；历史版本和第三方插件需另查许可证",
+        "实际生成依赖配置的模型与供应商；素材下载后可进入剪辑工具"
+      ],
+      "pricing_note": "开源代码许可不包含模型、API 或计算资源费用",
+      "sources": [
+        {
+          "url": "https://github.com/HBAI-Ltd/Toonflow-app/blob/30139c931e80476caa718b31684b86383c6e83ce/README.md",
+          "title": "Toonflow 固定版本 README",
+          "verified_on": "2026-10-25"
+        },
+        {
+          "url": "https://github.com/HBAI-Ltd/Toonflow-app/blob/30139c931e80476caa718b31684b86383c6e83ce/LICENSE",
+          "title": "Toonflow 固定版本 MIT LICENSE",
+          "verified_on": "2026-10-25"
+        }
+      ]
+    }
+  ]
+}

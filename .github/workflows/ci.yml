@@ -1,4 +1,4 @@
-name: Offline contract and pipeline checks
+name: Creator guide and offline compatibility checks
 
 on:
   push:
@@ -26,6 +26,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Regression tests
         run: python -m unittest discover -s tests -v
+      - name: Creator guide links and catalogs
+        run: python tools/check_guide.py
       - name: Check original episode
         run: python -m manju check examples/midnight_letter/episode.json
       - name: Check shared series
