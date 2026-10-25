@@ -1,5 +1,7 @@
 # 数据契约 0.1
 
+> 本页属于可选工程参考。个人实际制作先读[创作指南](creator-guide/README.md)；原有 mock 或接口契约不表示真实平台已接通。
+
 当前使用 UTF-8 JSON，不接受重复键、NaN 或 Infinity。不要求安装 JSON Schema 库；`manju.validation.validate` 是本版本可执行的契约依据。字段按严格集合检查，未知字段会报错，避免拼写错误被忽略。未来契约升级需要迁移程序和兼容测试。
 
 ## 独立单集

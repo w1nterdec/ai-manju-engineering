@@ -1,5 +1,7 @@
 # 模型接入与能力协商
 
+> 本页属于可选工程参考。个人实际制作先读[创作指南](creator-guide/README.md)；原有 mock 或接口契约不表示真实平台已接通。
+
 ## 当前状态
 
 旧 `manju/providers.py` 保持兼容。新增 `adapters.py` 提供八个能力层、聚合 mock、注册表、逐镜头路由与离线契约套件。`python -m manju providers` 查看能力；`adapter-test --out 目录` 验证适配器。没有真实模型适配器，CLI 不调用云服务、不需要密钥、不产生合成费用。

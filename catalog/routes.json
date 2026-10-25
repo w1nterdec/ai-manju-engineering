@@ -1,0 +1,52 @@
+{
+  "catalog_version": "1.0",
+  "as_of": "2026-10-25",
+  "region": "中国大陆个人创作者",
+  "routes": [
+    {
+      "id": "motion_comic",
+      "title": "图片动态漫",
+      "audience": "首次制作、旁白或对白驱动的动态漫画",
+      "steps": [
+        {"id": "script", "title": "确定原剧本和分镜", "input": "原创或已获使用权限的故事", "output": "原台词索引和镜头表", "tool_ids": ["doubao", "deepseek"], "human_check": "剧情、台词和角色关系正确"},
+        {"id": "reference", "title": "固定角色与场景参考", "input": "角色设定、服装、道具和空间关系", "output": "批准的角色和场景图片", "tool_ids": ["jimeng"], "human_check": "脸、衣服、站位和关键道具一致"},
+        {"id": "audio", "title": "逐句配音和纠音", "input": "原台词、姓名词典和固定音色", "output": "逐句试听通过的音频", "tool_ids": ["xunfei", "jianying"], "human_check": "姓名、情绪、音色和停顿正确"},
+        {"id": "image", "title": "生成并选择关键图", "input": "角色参考和逐镜图片提示词", "output": "每镜头选用的静态图片", "tool_ids": ["jimeng"], "human_check": "身份、手部、道具和剧情信息正确"},
+        {"id": "edit", "title": "图片动态化与剪辑", "input": "选用图片、配音、原文字幕", "output": "推拉移动和局部动态组成的短片", "tool_ids": ["jianying"], "human_check": "节奏清楚，字幕与最终音轨匹配"},
+        {"id": "review", "title": "完整审片与发布准备", "input": "成片、来源及全部返工记录", "output": "审核结论和发布清单", "tool_ids": ["jianying"], "human_check": "完整观看、核对三类质量问题和目标平台要求"}
+      ],
+      "fallbacks": "不需要所有镜头都生成视频；需要的动作可拆镜，关键文字用后期叠加。",
+      "limitations": "本路线是制作方法；工具的具体套餐、模型和账户能力需在使用时核对。"
+    },
+    {
+      "id": "story_video",
+      "title": "逐镜视频短剧",
+      "audience": "需要角色动作和表演的动漫或仿真人短片",
+      "steps": [
+        {"id": "script", "title": "锁定剧本和拆镜", "input": "原剧本和制作约束", "output": "每镜头一个主动作的分镜", "tool_ids": ["doubao", "deepseek"], "human_check": "原台词不遗漏，不新增未经确认的剧情"},
+        {"id": "reference", "title": "固定参考与关键图", "input": "人物、服装、场景和道具设定", "output": "经批准的参考图和关键帧", "tool_ids": ["jimeng"], "human_check": "同一身份、空间、视线和道具关系一致"},
+        {"id": "audio", "title": "配音小样确认时长", "input": "原台词和姓名词典", "output": "试听通过的配音及实际时长", "tool_ids": ["xunfei", "jianying"], "human_check": "读音和音色正确；画面计划容纳完整台词"},
+        {"id": "video", "title": "逐镜生成并筛选", "input": "批准关键图、参考素材与视频提示词", "output": "选用候选片及失败原因记录", "tool_ids": ["jimeng", "kling", "vidu", "hailuo"], "human_check": "完整播放，核对脸、肢体、动作、视线和剧情"},
+        {"id": "edit", "title": "剪辑与声音后期", "input": "选用候选片、配音、字幕和有权使用的音效", "output": "基础成片及可编辑工程", "tool_ids": ["jianying"], "human_check": "对白不被切断，字幕原文正确，相邻镜头衔接清楚"},
+        {"id": "review", "title": "审片及局部返工", "input": "完整成片与问题时间点", "output": "审核记录和发布材料", "tool_ids": ["jianying"], "human_check": "改动只重做相关素材；复核所有受影响镜头"}
+      ],
+      "fallbacks": "选一个主生成工具和一个备用；复杂动作优先拆镜，不盲目在所有平台重复付费。",
+      "limitations": "参考图不保证每次一致；不同产品及模型的参考、时长、声音和编辑能力不同。"
+    },
+    {
+      "id": "agent_first",
+      "title": "一站式 Agent 创作",
+      "audience": "希望先使用现有平台完成短剧制作的个人",
+      "steps": [
+        {"id": "script", "title": "准备并确认原剧本", "input": "故事、原台词和人物资料", "output": "可交给 Agent 的制作需求", "tool_ids": ["doubao", "deepseek", "xiaoyunque"], "human_check": "AI 改写必须经本人确认"},
+        {"id": "reference", "title": "确认全局角色与场景", "input": "角色参考、姓名读音、场景和风格", "output": "平台内确认的全局资产", "tool_ids": ["xiaoyunque"], "human_check": "先改错的设定，再进入分集生成"},
+        {"id": "video", "title": "故事板生成与片段重拍", "input": "已确认剧本、角色和场景", "output": "分镜视频与选用版本", "tool_ids": ["xiaoyunque"], "human_check": "逐镜检查人物、动作和剧情，错误片段返工"},
+        {"id": "audio", "title": "核对或替换配音", "input": "平台音轨、原台词和词典", "output": "姓名和台词正确的音轨", "tool_ids": ["xiaoyunque", "xunfei", "jianying"], "human_check": "原生声音也需逐句试听，必要时单独返工"},
+        {"id": "edit", "title": "导出与终剪", "input": "平台导出素材和声音", "output": "最终成片与工程", "tool_ids": ["xiaoyunque", "jianying"], "human_check": "字幕、节奏和所有受影响片段复核"},
+        {"id": "review", "title": "保存记录并发布", "input": "成片、来源与平台生成记录", "output": "审片与发布清单", "tool_ids": ["jianying"], "human_check": "完成 AI 声明，按具体作品核对目标平台准入"}
+      ],
+      "fallbacks": "一站式结果仍可导出后终剪，读音或单镜头问题按平台实际能力重拍或替换。",
+      "limitations": "不是无人值守发布；账户权限、积分和商用条款以当前官方页面为准。"
+    }
+  ]
+}

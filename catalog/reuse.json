@@ -1,0 +1,71 @@
+{
+  "catalog_version": "1.0",
+  "as_of": "2026-10-25",
+  "notice": "只记录候选与许可证证据；没有创建远端 fork、下载或执行第三方代码。使用时固定版本并重新核对。",
+  "projects": [
+    {
+      "id": "toonflow",
+      "name": "Toonflow",
+      "repository_url": "https://github.com/HBAI-Ltd/Toonflow-app",
+      "ref": "30139c931e80476caa718b31684b86383c6e83ce",
+      "license_id": "MIT",
+      "license_url": "https://github.com/HBAI-Ltd/Toonflow-app/blob/30139c931e80476caa718b31684b86383c6e83ce/LICENSE",
+      "checked_on": "2026-10-25",
+      "fit": "优先评估的创作工作台：画布、分镜及角色场景素材；可先直接使用，再决定 fork",
+      "restrictions": [
+        "保留版权与 MIT 许可通知",
+        "模型、素材及插件授权独立核对",
+        "仅引用和许可证核验，未部署、fork 或做代码安全审计"
+      ],
+      "integration_status": "reference_only"
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI",
+      "repository_url": "https://github.com/Comfy-Org/ComfyUI",
+      "ref": "19ae172bff6c9e4c738e7f2e00fe087f5b5b46ab",
+      "license_id": "GPL-3.0",
+      "license_url": "https://github.com/Comfy-Org/ComfyUI/blob/19ae172bff6c9e4c738e7f2e00fe087f5b5b46ab/LICENSE",
+      "checked_on": "2026-10-25",
+      "fit": "生成执行层与可复用节点工作流；优先独立部署并用公开接口交接",
+      "restrictions": [
+        "分发软件修改版本时按 GPL 履行对应源码和通知义务",
+        "不要把 GPL 软件代码直接按本仓库 MIT 重新发布",
+        "权重、LoRA、社区节点和在线服务另有条款"
+      ],
+      "integration_status": "reference_only"
+    },
+    {
+      "id": "narratoai",
+      "name": "NarratoAI",
+      "repository_url": "https://github.com/linyqh/NarratoAI",
+      "ref": "29a11b6cdf61b69ba90321fc5babc160e0ca2657",
+      "license_id": "MIT",
+      "license_url": "https://github.com/linyqh/NarratoAI/blob/29a11b6cdf61b69ba90321fc5babc160e0ca2657/LICENSE",
+      "checked_on": "2026-10-25",
+      "fit": "已有合法素材的解说、自动化剪辑、配音和字幕，可选后期参考",
+      "restrictions": [
+        "保留版权与 MIT 许可通知",
+        "它不是从零生成原创角色剧情的专用替代品",
+        "外部模型、声音和输入影视素材各自核对授权"
+      ],
+      "integration_status": "reference_only"
+    },
+    {
+      "id": "huobao_drama",
+      "name": "火宝短剧",
+      "repository_url": "https://github.com/chatfire-AI/huobao-drama",
+      "ref": "26de7df59806588e98e103a21bd0bfd26d4a55a6",
+      "license_id": "CC-BY-NC-SA-4.0",
+      "license_url": "https://github.com/chatfire-AI/huobao-drama/blob/26de7df59806588e98e103a21bd0bfd26d4a55a6/LICENSE",
+      "checked_on": "2026-10-25",
+      "fit": "了解剧本、角色、分镜和合成的流程，限按非商业条款评估",
+      "restrictions": [
+        "许可包含非商业及相同方式共享条件",
+        "个人创作者不自动等于非商业使用者",
+        "商业部署或再分发先取得与用途相符的明确授权"
+      ],
+      "integration_status": "reference_only"
+    }
+  ]
+}
