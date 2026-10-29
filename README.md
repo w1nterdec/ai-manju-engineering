@@ -1,4 +1,16 @@
+<div align="center">
+
 # 个人 AI 短剧与漫剧创作指南
+
+**从第一条样片开始，把想法变成镜头**
+
+创作线路 · 提示词 · 工具目录 · 制作包
+
+[开始第一条样片](docs/creator-guide/01-first-film.md) · [选择线路](docs/creator-guide/02-workflow.md) · [提示词库](prompts/README.md) · [工具目录](docs/creator-guide/06-tools.md)
+
+</div>
+
+---
 
 面向中国大陆个人创作者：复用现有工具，组织自己的生成线路，并在实际制作时查步骤、复制提示词、记录尝试和定位返工。
 
